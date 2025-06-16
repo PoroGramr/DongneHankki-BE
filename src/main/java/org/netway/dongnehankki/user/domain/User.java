@@ -48,6 +48,6 @@ public class User extends BaseEntity {
 	private List<Post> posts = new ArrayList<>();
 
 	enum Role {
-		OWNER, CUSTOMER
+		OWNER, CUSTOMER, ADMIN
 	}
 }
