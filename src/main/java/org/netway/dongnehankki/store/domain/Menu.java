@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class Menu extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private Long menuId;
 
 	private String name;
 
