@@ -38,7 +38,7 @@ public class User extends BaseEntity {
 	private Role role;
 
 	@OneToOne(optional = false)
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "store_id")
 	private Store store;
 
 	@OneToMany(mappedBy = "user")
