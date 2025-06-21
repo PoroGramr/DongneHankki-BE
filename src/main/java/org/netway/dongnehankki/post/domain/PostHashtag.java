@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PostHashtag {
 	@Id
-	@Column(nullable = false)
+	@Column(name = "post_hashtag_key", nullable = false)
 	private String key;
 
 	@ManyToOne(fetch = FetchType.LAZY)

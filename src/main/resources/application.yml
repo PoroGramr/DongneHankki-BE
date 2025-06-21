@@ -1,6 +1,6 @@
 spring:
-  config:
-    import: application-local.yml
+  profiles:
+    active: local
   datasource:
     url: jdbc:mysql://localhost:3306/dongnehankki?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ${MYSQL_USERNAME}
@@ -17,3 +17,10 @@ spring:
 logging:
   level:
     org.hibernate.sql: debug
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+    import: application-local.yml
