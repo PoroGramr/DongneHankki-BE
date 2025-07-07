@@ -37,7 +37,7 @@ public class User extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
-	@OneToOne(optional = false)
+	@OneToOne(optional = true)
 	@JoinColumn(name = "store_id")
 	private Store store;
 
@@ -47,7 +47,7 @@ public class User extends BaseEntity {
 	@OneToMany(mappedBy = "user")
 	private List<Post> posts = new ArrayList<>();
 
-	enum Role {
+	public enum Role {
 		OWNER, CUSTOMER, ADMIN
 	}
 }
