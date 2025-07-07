@@ -21,6 +21,10 @@ logging:
 server:
   url: ${SERVER_URL}
 
+jwt:
+  secret : ${SERVER_SECRET}
+  access-token-expiration-minutes: ${SERVER_EXPIRATION}
+
 ---
 spring:
   config:
