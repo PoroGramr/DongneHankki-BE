@@ -30,17 +30,39 @@ public class PostControllerTest {
     @WithMockUser
     void 포스트작성() throws Exception {
 
+        // given
         String content = "test";
         List<String> imageUrls = List.of("https://example.com/image1.jpg", "https://example.com/image2.png");
         List<String> hashtags = List.of("#맛집", "#Junit", "#테스트코드");
 
-
+        // when
         mockMvc.perform(post("/api/post/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(new PostCreateRequest(content, imageUrls, hashtags)))
                 .with(csrf())
+
+            // then
             ).andDo(print())
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void 포스트작성시_로그인하지않은경우() throws Exception {
+
+        // given
+        String content = "test";
+        List<String> imageUrls = List.of("https://example.com/image1.jpg", "https://example.com/image2.png");
+        List<String> hashtags = List.of("#맛집", "#Junit", "#테스트코드");
+
+        // when
+        mockMvc.perform(post("/api/post/create")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsBytes(new PostCreateRequest(content, imageUrls, hashtags)))
+                    .with(csrf())
+
+                // then
+            ).andDo(print())
+            .andExpect(status().isUnauthorized());
     }
 
 
