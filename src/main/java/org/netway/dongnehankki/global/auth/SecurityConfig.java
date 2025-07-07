@@ -27,8 +27,6 @@ public class SecurityConfig {
             // 1. 요청에 대한 인가 규칙 설정
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(SWAGGER_URLS).permitAll()
-                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN") // /user/** 경로는 USER 또는 ADMIN 역할 필요
-                .requestMatchers("/admin/**").hasRole("ADMIN") // /admin/** 경로는 ADMIN 역할만 가능
                 .requestMatchers("/", "/login").permitAll() // 루트(/)와 /login 경로는 누구나 접근 허용
                 .anyRequest().authenticated() // 그 외 모든 요청은 인증된 사용자만 접근 가능
             ).formLogin(form -> form
