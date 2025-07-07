@@ -28,9 +28,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(SWAGGER_URLS).permitAll()
                 .requestMatchers("/", "/login").permitAll() // 루트(/)와 /login 경로는 누구나 접근 허용
+                .requestMatchers("/api/user/create").permitAll()
+                .requestMatchers("/api/user/login").permitAll()
                 .anyRequest().authenticated() // 그 외 모든 요청은 인증된 사용자만 접근 가능
-            ).formLogin(form -> form
-                .defaultSuccessUrl("/", true)
             )
             .logout(logout -> logout
                 .logoutSuccessUrl("/")
