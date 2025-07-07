@@ -13,7 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
 
-    // 🔑 Swagger UI 접근을 허용하기 위한 URL 배열
+    // Swagger UI 접근을 허용하기 위한 URL 배열
     private static final String[] SWAGGER_URLS = {
         "/swagger-ui/**",
         "/v3/api-docs/**",
