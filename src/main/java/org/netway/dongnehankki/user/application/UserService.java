@@ -2,10 +2,9 @@ package org.netway.dongnehankki.user.application;
 
 import lombok.RequiredArgsConstructor;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
-import org.netway.dongnehankki.global.exception.CustomException;
-import org.netway.dongnehankki.global.exception.ErrorCode;
 import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
-import org.netway.dongnehankki.global.exception.user.UnregisteredStoreException;
+import org.netway.dongnehankki.global.exception.user.InvalidPasswordException;
+import org.netway.dongnehankki.global.exception.store.UnregisteredStoreException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
 import org.netway.dongnehankki.user.application.dto.response.UserResponse;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
@@ -51,7 +50,7 @@ public class UserService {
         });
 
         Store store = storeRepository.findByStoreId(ownerSingUpRequest.getStoreId())
-                .orElseThrow(() -> new CustomException(ErrorCode.UNREGISTERED_STORE));
+                .orElseThrow(() -> new UnregisteredStoreException());
 
         String encodedPassword = passwordEncoder.encode(ownerSingUpRequest.getPassword());
         User user = userRepository.save(User.ofOwner(ownerSingUpRequest.getId(), encodedPassword, ownerSingUpRequest.getNickname(), store));
@@ -61,13 +60,16 @@ public class UserService {
 
 
     public String login(LoginRequest loginRequest){
+        userRepository.findById(loginRequest.getId())
+                .orElseThrow(() -> new UnregisteredUserException());
+
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword());
 
         Authentication authentication;
         try {
             authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         } catch (BadCredentialsException e) {
-            throw new UnregisteredUserException();
+            throw new InvalidPasswordException();
         }
 
         String accessToken = jwtTokenProvider.generateToken(authentication);

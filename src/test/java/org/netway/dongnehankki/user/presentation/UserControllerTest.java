@@ -78,7 +78,7 @@ public class UserControllerTest {
 
         when(userService.customerJoin(any(CustomerSingUpRequest.class))).thenThrow(new DuplicateUserNameException());
 
-        mockMvc.perform(post("/api/user/customer")
+        mockMvc.perform(post("/api/customers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(new CustomerSingUpRequest(id, password,nickname)))
                 .with(csrf())

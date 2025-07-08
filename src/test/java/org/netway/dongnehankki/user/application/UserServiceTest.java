@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
 import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
+import org.netway.dongnehankki.global.exception.user.InvalidPasswordException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
 import org.netway.dongnehankki.store.domain.Store;
 import org.netway.dongnehankki.store.imfrastructure.StoreRepository;
@@ -22,6 +23,7 @@ import org.netway.dongnehankki.user.infrastructure.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -135,12 +137,27 @@ public class UserServiceTest {
         String id = "id";
         String password = "password";
 
-        User fixture = CustomerUserFixture.get(id, password);
-
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
         Assertions.assertThrows(
             UnregisteredUserException.class, () -> userService.login(new LoginRequest(id,password)));
     }
 
+    @Test
+    void 로그인시_비밀번호가_틀린_경우() {
+        String id = "id";
+        String password = "password";
+        String wrongPassword = "wrong_password";
+
+        User fixture = CustomerUserFixture.get(id, password);
+        when(userRepository.findById(id)).thenReturn(Optional.of(fixture));
+
+        AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+        when(authenticationManagerBuilder.getObject()).thenReturn(authenticationManager);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+            .thenThrow(new BadCredentialsException(""));
+
+        Assertions.assertThrows(
+            InvalidPasswordException.class, () -> userService.login(new LoginRequest(id, wrongPassword)));
+    }
 }

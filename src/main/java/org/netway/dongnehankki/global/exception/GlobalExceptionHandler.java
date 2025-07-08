@@ -39,10 +39,9 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(CustomException.class)
 	public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e) {
-		ErrorCode errorCode = e.getErrorCode();
-		log.error("Custom ERROR: {}", errorCode.getMessage());
-		return ResponseEntity.status(errorCode.getStatus())
-			.body(ApiResponse.error(errorCode.getCode(), errorCode.getMessage()));
+		log.error("Custom ERROR: {}", e.getMessage());
+		return ResponseEntity.status(e.getStatus())
+			.body(ApiResponse.error(String.valueOf(e.getStatus().value()), e.getMessage()));
 	}
 
 	@ExceptionHandler(Exception.class)
