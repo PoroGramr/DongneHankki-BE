@@ -17,8 +17,8 @@ import org.netway.dongnehankki.user.application.UserService;
 import org.netway.dongnehankki.user.application.dto.login.LoginResponse;
 import org.netway.dongnehankki.user.application.dto.response.UserResponse;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
-import org.netway.dongnehankki.user.application.dto.singUp.CustomerSingUpRequest;
-import org.netway.dongnehankki.user.application.dto.singUp.OwnerSingUpRequest;
+import org.netway.dongnehankki.user.application.dto.signUp.CustomerSignUpRequest;
+import org.netway.dongnehankki.user.application.dto.signUp.OwnerSignUpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,12 +46,12 @@ public class UserControllerTest {
         String password = "password";
         String nickname = "nickname";
 
-        when(userService.customerJoin(any(CustomerSingUpRequest.class))).thenReturn(mock(
+        when(userService.customerJoin(any(CustomerSignUpRequest.class))).thenReturn(mock(
             UserResponse.class));
 
         mockMvc.perform(post("/api/customers")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsBytes(new CustomerSingUpRequest(id, password,nickname)))
+            .content(objectMapper.writeValueAsBytes(new CustomerSignUpRequest(id, password,nickname)))
             .with(csrf())
         ).andDo(print())
             .andExpect(status().isOk());
@@ -66,7 +66,7 @@ public class UserControllerTest {
 
         mockMvc.perform(post("/api/owners")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(new OwnerSingUpRequest(id,password,nickname,storeId)))
+                .content(objectMapper.writeValueAsBytes(new OwnerSignUpRequest(id,password,nickname,storeId)))
                 .with(csrf())
             ).andDo(print())
             .andExpect(status().isOk());
@@ -78,11 +78,11 @@ public class UserControllerTest {
         String password = "password";
         String nickname = "nickname";
 
-        when(userService.customerJoin(any(CustomerSingUpRequest.class))).thenThrow(new DuplicateUserNameException());
+        when(userService.customerJoin(any(CustomerSignUpRequest.class))).thenThrow(new DuplicateUserNameException());
 
         mockMvc.perform(post("/api/customers")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(new CustomerSingUpRequest(id, password,nickname)))
+                .content(objectMapper.writeValueAsBytes(new CustomerSignUpRequest(id, password,nickname)))
                 .with(csrf())
             ).andDo(print())
             .andExpect(status().isBadRequest());
@@ -93,8 +93,7 @@ public class UserControllerTest {
         String id = "username";
         String password = "password";
 
-        when(userService.login(any(LoginRequest.class))).thenReturn(mock(
-            LoginResponse.class));
+        when(userService.login(any(LoginRequest.class))).thenReturn(mock(LoginResponse.class));
 
         mockMvc.perform(post("/api/login")
                 .contentType(MediaType.APPLICATION_JSON)

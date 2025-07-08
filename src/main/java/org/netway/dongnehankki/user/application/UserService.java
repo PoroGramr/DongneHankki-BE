@@ -12,8 +12,8 @@ import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
 import org.netway.dongnehankki.user.application.dto.response.UserResponse;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
 import org.netway.dongnehankki.user.application.dto.login.LoginResponse;
-import org.netway.dongnehankki.user.application.dto.singUp.CustomerSingUpRequest;
-import org.netway.dongnehankki.user.application.dto.singUp.OwnerSingUpRequest;
+import org.netway.dongnehankki.user.application.dto.signUp.CustomerSignUpRequest;
+import org.netway.dongnehankki.user.application.dto.signUp.OwnerSignUpRequest;
 import org.netway.dongnehankki.user.domain.User;
 import org.netway.dongnehankki.user.infrastructure.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -38,27 +38,27 @@ public class UserService {
     private final StoreRepository storeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public UserResponse customerJoin(CustomerSingUpRequest customerSingUpRequest){
-        userRepository.findById(customerSingUpRequest.getId()).ifPresent(it -> {
+    public UserResponse customerJoin(CustomerSignUpRequest customerSignUpRequest){
+        userRepository.findById(customerSignUpRequest.getId()).ifPresent(it -> {
             throw new DuplicateUserNameException();
         });
 
-        String encodedPassword = passwordEncoder.encode(customerSingUpRequest.getPassword());
-        User user = userRepository.save(User.ofCustomer(customerSingUpRequest.getId(), encodedPassword, customerSingUpRequest.getNickname()));
+        String encodedPassword = passwordEncoder.encode(customerSignUpRequest.getPassword());
+        User user = userRepository.save(User.ofCustomer(customerSignUpRequest.getId(), encodedPassword, customerSignUpRequest.getNickname()));
 
         return UserResponse.fromEntity(user);
     }
 
-    public UserResponse ownerJoin(OwnerSingUpRequest ownerSingUpRequest) {
-        userRepository.findById(ownerSingUpRequest.getId()).ifPresent(it -> {
+    public UserResponse ownerJoin(OwnerSignUpRequest ownerSignUpRequest) {
+        userRepository.findById(ownerSignUpRequest.getId()).ifPresent(it -> {
             throw new DuplicateUserNameException();
         });
 
-        Store store = storeRepository.findByStoreId(ownerSingUpRequest.getStoreId())
+        Store store = storeRepository.findByStoreId(ownerSignUpRequest.getStoreId())
                 .orElseThrow(() -> new UnregisteredStoreException());
 
-        String encodedPassword = passwordEncoder.encode(ownerSingUpRequest.getPassword());
-        User user = userRepository.save(User.ofOwner(ownerSingUpRequest.getId(), encodedPassword, ownerSingUpRequest.getNickname(), store));
+        String encodedPassword = passwordEncoder.encode(ownerSignUpRequest.getPassword());
+        User user = userRepository.save(User.ofOwner(ownerSignUpRequest.getId(), encodedPassword, ownerSignUpRequest.getNickname(), store));
 
         return UserResponse.fromEntity(user);
     }

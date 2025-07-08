@@ -18,8 +18,8 @@ import org.netway.dongnehankki.store.domain.Store;
 import org.netway.dongnehankki.store.imfrastructure.StoreRepository;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
 import org.netway.dongnehankki.user.application.dto.login.LoginResponse;
-import org.netway.dongnehankki.user.application.dto.singUp.CustomerSingUpRequest;
-import org.netway.dongnehankki.user.application.dto.singUp.OwnerSingUpRequest;
+import org.netway.dongnehankki.user.application.dto.signUp.CustomerSignUpRequest;
+import org.netway.dongnehankki.user.application.dto.signUp.OwnerSignUpRequest;
 import org.netway.dongnehankki.user.domain.User;
 import org.netway.dongnehankki.user.fixture.CustomerUserFixture;
 import org.netway.dongnehankki.user.fixture.OwnerUserFixture;
@@ -68,7 +68,7 @@ public class UserServiceTest {
         when(userRepository.save(any())).thenReturn(CustomerUserFixture.get(id, password));
         when(passwordEncoder.encode(password)).thenReturn("encodedPassword");
 
-        Assertions.assertDoesNotThrow(() -> userService.customerJoin(new CustomerSingUpRequest(id,password,nickname)));
+        Assertions.assertDoesNotThrow(() -> userService.customerJoin(new CustomerSignUpRequest(id,password,nickname)));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class UserServiceTest {
         when(mockStore.getStoreId()).thenReturn(storeId);
         when(storeRepository.findByStoreId(storeId)).thenReturn(Optional.of(mockStore));
 
-        Assertions.assertDoesNotThrow(() -> userService.ownerJoin(new OwnerSingUpRequest(id,password,nickname,storeId)));
+        Assertions.assertDoesNotThrow(() -> userService.ownerJoin(new OwnerSignUpRequest(id,password,nickname,storeId)));
     }
 
     @Test
@@ -98,7 +98,7 @@ public class UserServiceTest {
 
         when(userRepository.findById(id)).thenReturn(Optional.of(fixture));
 
-        Assertions.assertThrows(DuplicateUserNameException.class, () -> userService.customerJoin(new CustomerSingUpRequest(id,password,nickname)));
+        Assertions.assertThrows(DuplicateUserNameException.class, () -> userService.customerJoin(new CustomerSignUpRequest(id,password,nickname)));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class UserServiceTest {
         when(mockStore.getStoreId()).thenReturn(storeId);
         when(storeRepository.findByStoreId(storeId)).thenReturn(Optional.of(mockStore));
 
-        Assertions.assertThrows(DuplicateUserNameException.class, () -> userService.ownerJoin(new OwnerSingUpRequest(id,password,nickname,storeId)));
+        Assertions.assertThrows(DuplicateUserNameException.class, () -> userService.ownerJoin(new OwnerSignUpRequest(id,password,nickname,storeId)));
     }
 
     @Test
@@ -128,7 +128,6 @@ public class UserServiceTest {
 
         User fixture = CustomerUserFixture.get(id, password);
         when(userRepository.findById(id)).thenReturn(Optional.of(fixture));
-        when(fixture.getUserId()).thenReturn(userId);
 
         AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
         when(authenticationManagerBuilder.getObject()).thenReturn(authenticationManager);
@@ -180,7 +179,6 @@ public class UserServiceTest {
         String newRefreshToken = "new_refresh_token";
 
         User userFixture = CustomerUserFixture.get("id", "password");
-        when(userFixture.getUserId()).thenReturn(userId);
 
         RefreshToken storedRefreshToken = RefreshToken.builder()
                 .userId(userId)

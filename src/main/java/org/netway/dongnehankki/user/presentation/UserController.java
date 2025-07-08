@@ -6,8 +6,8 @@ import org.netway.dongnehankki.user.application.UserService;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
 import org.netway.dongnehankki.user.application.dto.login.LoginResponse;
 import org.netway.dongnehankki.user.application.dto.login.RefreshTokenRequest;
-import org.netway.dongnehankki.user.application.dto.singUp.CustomerSingUpRequest;
-import org.netway.dongnehankki.user.application.dto.singUp.OwnerSingUpRequest;
+import org.netway.dongnehankki.user.application.dto.signUp.CustomerSignUpRequest;
+import org.netway.dongnehankki.user.application.dto.signUp.OwnerSignUpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,14 +22,14 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/customers")
-    public ResponseEntity<ApiResponse<Void>> signUpCustomer(@RequestBody CustomerSingUpRequest customerSingUpRequest) {
-        userService.customerJoin(customerSingUpRequest);
+    public ResponseEntity<ApiResponse<Void>> signUpCustomer(@RequestBody CustomerSignUpRequest customerSignUpRequest) {
+        userService.customerJoin(customerSignUpRequest);
         return ResponseEntity.ok(ApiResponse.success());
     }
 
     @PostMapping("/owners")
-    public ResponseEntity<ApiResponse<Void>> signUpOwner(@RequestBody OwnerSingUpRequest ownerSingUpRequest) {
-        userService.ownerJoin(ownerSingUpRequest);
+    public ResponseEntity<ApiResponse<Void>> signUpOwner(@RequestBody OwnerSignUpRequest ownerSignUpRequest) {
+        userService.ownerJoin(ownerSignUpRequest);
         return ResponseEntity.ok(ApiResponse.success());
     }
 
