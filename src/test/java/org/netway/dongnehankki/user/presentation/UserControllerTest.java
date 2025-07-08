@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
+import org.netway.dongnehankki.global.exception.user.InvalidPasswordException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
 import org.netway.dongnehankki.user.application.UserService;
 import org.netway.dongnehankki.user.application.dto.response.UserResponse;
@@ -121,7 +122,7 @@ public class UserControllerTest {
         String id = "username";
         String password = "password";
 
-        when(userService.login(any(LoginRequest.class))).thenThrow(new UnregisteredUserException());
+        when(userService.login(any(LoginRequest.class))).thenThrow(new InvalidPasswordException());
 
         mockMvc.perform(post("/api/login")
                 .contentType(MediaType.APPLICATION_JSON)
