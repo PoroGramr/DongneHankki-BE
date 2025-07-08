@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.netway.dongnehankki.global.exception.CustomException;
+import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
 import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
@@ -17,6 +17,11 @@ import org.netway.dongnehankki.user.fixture.UserFixture;
 import org.netway.dongnehankki.user.imfrastructure.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
@@ -28,6 +33,15 @@ public class UserServiceTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private PasswordEncoder passwordEncoder;
+
+    @MockitoBean
+    private AuthenticationManagerBuilder authenticationManagerBuilder;
+
+    @MockitoBean
+    private JwtTokenProvider jwtTokenProvider;
+
     @Test
     void 회원가입이_정상적으로_동작하는경우() {
         String id = "id";
@@ -35,7 +49,8 @@ public class UserServiceTest {
         String nickname = "nickname";
 
         when(userRepository.findById(id)).thenReturn(Optional.empty());
-        when(userRepository.save(any())).thenReturn(Optional.of(UserFixture.get(id, password)));
+        when(userRepository.save(any())).thenReturn(UserFixture.get(id, password));
+        when(passwordEncoder.encode(password)).thenReturn("encodedPassword");
 
         Assertions.assertDoesNotThrow(() -> userService.customerJoin(new CustomerSingUpRequest(id,password,nickname)));
     }
@@ -60,6 +75,14 @@ public class UserServiceTest {
 
         User fixture = UserFixture.get(id, password);
         when(userRepository.findById(id)).thenReturn(Optional.of(fixture));
+
+        AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+        when(authenticationManagerBuilder.getObject()).thenReturn(authenticationManager);
+
+        Authentication authentication = mock(Authentication.class);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
+
+        when(jwtTokenProvider.generateToken(authentication)).thenReturn("dummy_jwt_token");
 
         Assertions.assertDoesNotThrow(() -> userService.login(new LoginRequest(id,password)));
     }

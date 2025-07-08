@@ -5,6 +5,7 @@ import org.netway.dongnehankki.global.common.ApiResponse;
 import org.netway.dongnehankki.user.application.UserService;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
 import org.netway.dongnehankki.user.application.dto.singup.CustomerSingUpRequest;
+import org.netway.dongnehankki.user.application.dto.singup.OwnerSingUpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,15 @@ public class UserController {
     @PostMapping("/customer")
     public  ResponseEntity<ApiResponse<CustomerSingUpRequest>> customerJoin(@RequestBody CustomerSingUpRequest customerSingUpRequest){
         userService.customerJoin(customerSingUpRequest);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    @PostMapping("/owner")
+    public  ResponseEntity<ApiResponse<OwnerSingUpRequest>> ownerJoin(@RequestBody OwnerSingUpRequest ownerSingUpRequest){
+
+        // TODO : Implementation
+        //        userService.ownerJoin(ownerSingUpRequest);
+
         return ResponseEntity.ok(ApiResponse.success());
     }
 

@@ -12,10 +12,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
+import org.netway.dongnehankki.store.domain.Store;
 import org.netway.dongnehankki.user.application.UserService;
 import org.netway.dongnehankki.user.application.dto.response.UserResponse;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
 import org.netway.dongnehankki.user.application.dto.singup.CustomerSingUpRequest;
+import org.netway.dongnehankki.user.application.dto.singup.OwnerSingUpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,6 +53,21 @@ public class UserControllerTest {
             .content(objectMapper.writeValueAsBytes(new CustomerSingUpRequest(id, password,nickname)))
             .with(csrf())
         ).andDo(print())
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void 사장회원_회원가입() throws Exception{
+        String id = "username";
+        String password = "password";
+        String nickname = "nickname";
+        Long storeId = 1L;
+
+        mockMvc.perform(post("/api/user/owner")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(new OwnerSingUpRequest(id,password,nickname,storeId)))
+                .with(csrf())
+            ).andDo(print())
             .andExpect(status().isOk());
     }
 
