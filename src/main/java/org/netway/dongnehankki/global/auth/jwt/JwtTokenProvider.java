@@ -42,38 +42,38 @@ public class JwtTokenProvider {
                 .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
-        Date accessTokenExpiresIn = new Date(now + accessTokenExpirationMinutes * 60 * 1000); // 분 단위를 밀리초로 변환
+        Date accessTokenExpiresIn = new Date(now + accessTokenExpirationMinutes * 60 * 1000);
+
         JwtBuilder builder = Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("auth", authorities)
+                .claim("role", authorities)
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256);
 
         if (authentication.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+            builder.claim("userId", customUserDetails.getUser().getUserId());
             if (customUserDetails.getUser().getRole() == Role.OWNER && customUserDetails.getUser().getStore() != null) {
                 builder.claim("storeId", customUserDetails.getUser().getStore().getStoreId());
             }
         }
 
-        String accessToken = builder.compact();
-
-        return accessToken;
+        return builder.compact();
     }
 
 
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken);
 
-        if (claims.get("auth") == null) {
+        if (claims.get("role") == null) {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
 
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("auth").toString().split(","))
+        Collection<? extends GrantedAuthority> authorities = 
+                Arrays.stream(claims.get("role").toString().split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        String userId = claims.get("userId", Long.class).toString();
+        UserDetails principal = new User(userId, "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
