@@ -20,7 +20,7 @@ public class UserController {
 
     @PostMapping("/create")
     public  ResponseEntity<ApiResponse<CustomerSingUpRequest>> customerJoin(@RequestBody CustomerSingUpRequest customerSingUpRequest){
-        userService.CustomerJoin(customerSingUpRequest);
+        userService.customerJoin(customerSingUpRequest);
         return ResponseEntity.ok(ApiResponse.success());
     }
 

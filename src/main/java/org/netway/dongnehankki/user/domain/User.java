@@ -50,4 +50,28 @@ public class User extends BaseEntity {
 	public enum Role {
 		OWNER, CUSTOMER, ADMIN
 	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+
+	public void setStore(Store store) {
+		this.store = store;
+	}
 }
