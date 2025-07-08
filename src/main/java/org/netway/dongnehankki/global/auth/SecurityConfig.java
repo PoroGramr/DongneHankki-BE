@@ -53,10 +53,9 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(SWAGGER_URLS).permitAll()
-                .requestMatchers("/", "/login").permitAll()
+                .requestMatchers("/", "/api/login", "/api/refresh").permitAll()
                 .requestMatchers("/api/customers").permitAll()
                 .requestMatchers("/api/owners").permitAll()
-                .requestMatchers("/api/login").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);

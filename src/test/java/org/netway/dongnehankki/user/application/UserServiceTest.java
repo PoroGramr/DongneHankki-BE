@@ -8,12 +8,16 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
+import org.netway.dongnehankki.global.auth.jwt.RefreshToken;
+import org.netway.dongnehankki.global.auth.jwt.RefreshTokenRepository;
 import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
 import org.netway.dongnehankki.global.exception.user.InvalidPasswordException;
+import org.netway.dongnehankki.global.exception.user.InvalidRefreshTokenException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
 import org.netway.dongnehankki.store.domain.Store;
 import org.netway.dongnehankki.store.imfrastructure.StoreRepository;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
+import org.netway.dongnehankki.user.application.dto.login.LoginResponse;
 import org.netway.dongnehankki.user.application.dto.singUp.CustomerSingUpRequest;
 import org.netway.dongnehankki.user.application.dto.singUp.OwnerSingUpRequest;
 import org.netway.dongnehankki.user.domain.User;
@@ -50,6 +54,9 @@ public class UserServiceTest {
 
     @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
+
+    @MockitoBean
+    private RefreshTokenRepository refreshTokenRepository;
 
     @Test
     void 일반회원_회원가입이_정상적으로_동작하는경우() {
@@ -117,9 +124,11 @@ public class UserServiceTest {
     void 로그인이_정상적으로_동작하는_경우() {
         String id = "id";
         String password = "password";
+        Long userId = 1L;
 
         User fixture = CustomerUserFixture.get(id, password);
         when(userRepository.findById(id)).thenReturn(Optional.of(fixture));
+        when(fixture.getUserId()).thenReturn(userId);
 
         AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
         when(authenticationManagerBuilder.getObject()).thenReturn(authenticationManager);
@@ -127,7 +136,9 @@ public class UserServiceTest {
         Authentication authentication = mock(Authentication.class);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
 
-        when(jwtTokenProvider.generateToken(authentication)).thenReturn("dummy_jwt_token");
+        when(jwtTokenProvider.generateToken(authentication)).thenReturn("dummy_access_token");
+        when(jwtTokenProvider.generateRefreshToken(userId)).thenReturn("dummy_refresh_token");
+        when(jwtTokenProvider.getRefreshTokenExpirationMinutes()).thenReturn(1440L); // 24시간
 
         Assertions.assertDoesNotThrow(() -> userService.login(new LoginRequest(id,password)));
     }
@@ -159,5 +170,62 @@ public class UserServiceTest {
 
         Assertions.assertThrows(
             InvalidPasswordException.class, () -> userService.login(new LoginRequest(id, wrongPassword)));
+    }
+
+    @Test
+    void 리프레시_토큰_재발급이_정상적으로_동작하는_경우() {
+        Long userId = 1L;
+        String oldRefreshToken = "old_refresh_token";
+        String newAccessToken = "new_access_token";
+        String newRefreshToken = "new_refresh_token";
+
+        User userFixture = CustomerUserFixture.get("id", "password");
+        when(userFixture.getUserId()).thenReturn(userId);
+
+        RefreshToken storedRefreshToken = RefreshToken.builder()
+                .userId(userId)
+                .token(oldRefreshToken)
+                .expiration(1440L * 60)
+                .build();
+
+        when(jwtTokenProvider.validateToken(oldRefreshToken)).thenReturn(true);
+        when(jwtTokenProvider.getUserIdFromToken(oldRefreshToken)).thenReturn(userId);
+        when(refreshTokenRepository.findById(userId)).thenReturn(Optional.of(storedRefreshToken));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(userFixture));
+        when(jwtTokenProvider.generateToken(any(Authentication.class))).thenReturn(newAccessToken);
+        when(jwtTokenProvider.generateRefreshToken(userId)).thenReturn(newRefreshToken);
+        when(jwtTokenProvider.getRefreshTokenExpirationMinutes()).thenReturn(1440L);
+
+        LoginResponse response = userService.reissueTokens(oldRefreshToken);
+
+        Assertions.assertEquals(newAccessToken, response.getAccessToken());
+        Assertions.assertEquals(newRefreshToken, response.getRefreshToken());
+    }
+
+    @Test
+    void 유효하지_않은_리프레시_토큰으로_재발급을_요청하는_경우() {
+        String invalidRefreshToken = "invalid_refresh_token";
+
+        // 시나리오 1: 토큰 유효성 검증 실패
+        when(jwtTokenProvider.validateToken(invalidRefreshToken)).thenReturn(false);
+        Assertions.assertThrows(InvalidRefreshTokenException.class, () -> userService.reissueTokens(invalidRefreshToken));
+
+        // 시나리오 2: Redis에 토큰이 없는 경우
+        when(jwtTokenProvider.validateToken(invalidRefreshToken)).thenReturn(true);
+        when(jwtTokenProvider.getUserIdFromToken(invalidRefreshToken)).thenReturn(1L);
+        when(refreshTokenRepository.findById(1L)).thenReturn(Optional.empty());
+        Assertions.assertThrows(InvalidRefreshTokenException.class, () -> userService.reissueTokens(invalidRefreshToken));
+
+        // 시나리오 3: Redis에 저장된 토큰과 요청된 토큰이 일치하지 않는 경우
+        String mismatchedRefreshToken = "mismatched_refresh_token";
+        RefreshToken storedRefreshToken = RefreshToken.builder()
+                .userId(1L)
+                .token("actual_stored_token")
+                .expiration(1440L * 60)
+                .build();
+        when(jwtTokenProvider.validateToken(mismatchedRefreshToken)).thenReturn(true);
+        when(jwtTokenProvider.getUserIdFromToken(mismatchedRefreshToken)).thenReturn(1L);
+        when(refreshTokenRepository.findById(1L)).thenReturn(Optional.of(storedRefreshToken));
+        Assertions.assertThrows(InvalidRefreshTokenException.class, () -> userService.reissueTokens(mismatchedRefreshToken));
     }
 }

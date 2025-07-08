@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.netway.dongnehankki.global.common.ApiResponse;
 import org.netway.dongnehankki.user.application.UserService;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
+import org.netway.dongnehankki.user.application.dto.login.LoginResponse;
+import org.netway.dongnehankki.user.application.dto.login.RefreshTokenRequest;
 import org.netway.dongnehankki.user.application.dto.singUp.CustomerSingUpRequest;
 import org.netway.dongnehankki.user.application.dto.singUp.OwnerSingUpRequest;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +34,15 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<String>> login(@RequestBody LoginRequest loginRequest) {
-        String token = userService.login(loginRequest);
-        return ResponseEntity.ok(ApiResponse.success(token));
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest loginRequest) {
+        LoginResponse loginResponse = userService.login(loginRequest);
+        return ResponseEntity.ok(ApiResponse.success(loginResponse));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<LoginResponse>> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        LoginResponse loginResponse = userService.reissueTokens(refreshTokenRequest.getRefreshToken());
+        return ResponseEntity.ok(ApiResponse.success(loginResponse));
     }
 
 }

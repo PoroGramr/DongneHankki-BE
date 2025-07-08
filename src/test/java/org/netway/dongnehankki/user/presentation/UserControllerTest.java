@@ -14,6 +14,7 @@ import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
 import org.netway.dongnehankki.global.exception.user.InvalidPasswordException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
 import org.netway.dongnehankki.user.application.UserService;
+import org.netway.dongnehankki.user.application.dto.login.LoginResponse;
 import org.netway.dongnehankki.user.application.dto.response.UserResponse;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
 import org.netway.dongnehankki.user.application.dto.singUp.CustomerSingUpRequest;
@@ -92,7 +93,8 @@ public class UserControllerTest {
         String id = "username";
         String password = "password";
 
-        when(userService.login(any(LoginRequest.class))).thenReturn("test_token");
+        when(userService.login(any(LoginRequest.class))).thenReturn(mock(
+            LoginResponse.class));
 
         mockMvc.perform(post("/api/login")
                 .contentType(MediaType.APPLICATION_JSON)

@@ -10,6 +10,7 @@ public class CustomerUserFixture {
         result.setUserId(1L);
         result.setId(id);
         result.setPassword(password);
+        result.setRole(User.Role.CUSTOMER);
         return result;
     }
 

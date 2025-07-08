@@ -2,12 +2,16 @@ package org.netway.dongnehankki.user.application;
 
 import lombok.RequiredArgsConstructor;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
+import org.netway.dongnehankki.global.auth.jwt.RefreshToken;
+import org.netway.dongnehankki.global.auth.jwt.RefreshTokenRepository;
 import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
 import org.netway.dongnehankki.global.exception.user.InvalidPasswordException;
 import org.netway.dongnehankki.global.exception.store.UnregisteredStoreException;
+import org.netway.dongnehankki.global.exception.user.InvalidRefreshTokenException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
 import org.netway.dongnehankki.user.application.dto.response.UserResponse;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
+import org.netway.dongnehankki.user.application.dto.login.LoginResponse;
 import org.netway.dongnehankki.user.application.dto.singUp.CustomerSingUpRequest;
 import org.netway.dongnehankki.user.application.dto.singUp.OwnerSingUpRequest;
 import org.netway.dongnehankki.user.domain.User;
@@ -32,6 +36,7 @@ public class UserService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     private final StoreRepository storeRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public UserResponse customerJoin(CustomerSingUpRequest customerSingUpRequest){
         userRepository.findById(customerSingUpRequest.getId()).ifPresent(it -> {
@@ -59,9 +64,9 @@ public class UserService {
     }
 
 
-    public String login(LoginRequest loginRequest){
-        userRepository.findById(loginRequest.getId())
-                .orElseThrow(() -> new UnregisteredUserException());
+    public LoginResponse login(LoginRequest loginRequest){
+        User user = userRepository.findById(loginRequest.getId())
+                .orElseThrow(UnregisteredUserException::new);
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getId(), loginRequest.getPassword());
 
@@ -73,8 +78,52 @@ public class UserService {
         }
 
         String accessToken = jwtTokenProvider.generateToken(authentication);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUserId());
 
-        return accessToken;
+        refreshTokenRepository.save(RefreshToken.builder()
+                .userId(user.getUserId())
+                .token(refreshToken)
+                .expiration(jwtTokenProvider.getRefreshTokenExpirationMinutes() * 60) // 초 단위로 저장
+                .build());
+
+        return new LoginResponse(accessToken, refreshToken);
+    }
+
+    public LoginResponse reissueTokens(String refreshToken) {
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        Long userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+
+        RefreshToken storedRefreshToken = refreshTokenRepository.findById(userId)
+                .orElseThrow(InvalidRefreshTokenException::new);
+
+        if (!storedRefreshToken.getToken().equals(refreshToken)) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        refreshTokenRepository.delete(storedRefreshToken);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(UnregisteredUserException::new);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                new org.springframework.security.core.userdetails.User(user.getId(), "", user.getAuthorities()),
+                "",
+                user.getAuthorities()
+        );
+
+        String newAccessToken = jwtTokenProvider.generateToken(authentication);
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(userId);
+
+        refreshTokenRepository.save(RefreshToken.builder()
+                .userId(userId)
+                .token(newRefreshToken)
+                .expiration(jwtTokenProvider.getRefreshTokenExpirationMinutes() * 60)
+                .build());
+
+        return new LoginResponse(newAccessToken, newRefreshToken);
     }
 
 

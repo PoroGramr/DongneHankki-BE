@@ -31,6 +31,9 @@ public class JwtTokenProvider {
     @Value("${jwt.access-token-expiration-minutes}")
     private long accessTokenExpirationMinutes;
 
+    @Value("${jwt.refresh-token-expiration-minutes}")
+    private long refreshTokenExpirationMinutes;
+
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
@@ -57,6 +60,26 @@ public class JwtTokenProvider {
         }
 
         return builder.compact();
+    }
+
+    public String generateRefreshToken(Long userId) {
+        long now = (new Date()).getTime();
+        Date refreshTokenExpiresIn = new Date(now + refreshTokenExpirationMinutes * 60 * 1000);
+
+        return Jwts.builder()
+                .claim("userId", userId)
+                .setExpiration(refreshTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public Long getUserIdFromToken(String token) {
+        Claims claims = parseClaims(token);
+        return claims.get("userId", Long.class);
+    }
+
+    public long getRefreshTokenExpirationMinutes() {
+        return refreshTokenExpirationMinutes;
     }
 
 
