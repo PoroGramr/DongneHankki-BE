@@ -24,15 +24,15 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(SWAGGER_URLS).permitAll()
-                .requestMatchers("/", "/login").permitAll() // 루트(/)와 /login 경로는 누구나 접근 허용
+                .requestMatchers("/", "/login").permitAll()
                 .requestMatchers("/api/user/customer").permitAll()
                 .requestMatchers("/api/user/login").permitAll()
-                .anyRequest().authenticated() // 그 외 모든 요청은 인증된 사용자만 접근 가능
+                .anyRequest().authenticated()
             )
             .logout(logout -> logout
                 .logoutSuccessUrl("/")
             )
-            .csrf(csrf -> csrf.disable()); // CSRF 보호 비활성화
+            .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
