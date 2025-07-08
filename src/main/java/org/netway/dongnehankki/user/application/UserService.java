@@ -9,6 +9,7 @@ import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
 import org.netway.dongnehankki.user.application.dto.singup.CustomerSingUpRequest;
 import org.netway.dongnehankki.user.domain.User;
 import org.netway.dongnehankki.user.imfrastructure.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,13 +17,15 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private  final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponse customerJoin(CustomerSingUpRequest customerSingUpRequest){
         userRepository.findById(customerSingUpRequest.getId()).ifPresent(it -> {
             throw new DuplicateUserNameException();
         });
 
-        User user = userRepository.save(User.ofCustomer(customerSingUpRequest.getId(), customerSingUpRequest.getPassword(), customerSingUpRequest.getNickname()));
+        String encodedPassword = passwordEncoder.encode(customerSingUpRequest.getPassword());
+        User user = userRepository.save(User.ofCustomer(customerSingUpRequest.getId(), encodedPassword, customerSingUpRequest.getNickname()));
 
         return UserResponse.fromEntity(user);
     }
@@ -32,7 +35,7 @@ public class UserService {
         Optional<User> user = Optional.ofNullable(userRepository.findById(loginRequest.getId())
             .orElseThrow(() -> new UnregisteredUserException()));
 
-        if(!user.get().getPassword().equals(loginRequest.getPassword())){
+        if(!passwordEncoder.matches(loginRequest.getPassword(), user.get().getPassword())){
             throw new UnregisteredUserException();
         }
 
