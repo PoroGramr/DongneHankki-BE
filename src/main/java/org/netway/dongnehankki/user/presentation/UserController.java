@@ -27,10 +27,7 @@ public class UserController {
 
     @PostMapping("/owner")
     public  ResponseEntity<ApiResponse<OwnerSingUpRequest>> ownerJoin(@RequestBody OwnerSingUpRequest ownerSingUpRequest){
-
-        // TODO : Implementation
-        //        userService.ownerJoin(ownerSingUpRequest);
-
+        userService.ownerJoin(ownerSingUpRequest);
         return ResponseEntity.ok(ApiResponse.success());
     }
 
