@@ -68,7 +68,6 @@ public class UserServiceTest {
     void 회원가입하지_않은_정보로_로그인하는_경우() {
         String id = "id";
         String password = "password";
-        String nickname = "nickname";
 
         User fixture = UserFixture.get(id, password);
 

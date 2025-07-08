@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
 import org.netway.dongnehankki.user.application.UserService;
+import org.netway.dongnehankki.user.application.dto.response.UserResponse;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
 import org.netway.dongnehankki.user.application.dto.singup.CustomerSingUpRequest;
-import org.netway.dongnehankki.user.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,9 +43,10 @@ public class UserControllerTest {
         String password = "password";
         String nickname = "nickname";
 
-        when(userService.customerJoin(any(CustomerSingUpRequest.class))).thenReturn(mock(User.class));
+        when(userService.customerJoin(any(CustomerSingUpRequest.class))).thenReturn(mock(
+            UserResponse.class));
 
-        mockMvc.perform(post("/api/user/create")
+        mockMvc.perform(post("/api/user/customer")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsBytes(new CustomerSingUpRequest(id, password,nickname)))
             .with(csrf())
@@ -61,7 +62,7 @@ public class UserControllerTest {
 
         when(userService.customerJoin(any(CustomerSingUpRequest.class))).thenThrow(new DuplicateUserNameException());
 
-        mockMvc.perform(post("/api/user/create")
+        mockMvc.perform(post("/api/user/customer")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(new CustomerSingUpRequest(id, password,nickname)))
                 .with(csrf())

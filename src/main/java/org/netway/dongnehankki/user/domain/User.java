@@ -51,6 +51,24 @@ public class User extends BaseEntity {
 		OWNER, CUSTOMER, ADMIN
 	}
 
+	public static User ofCustomer(String id, String password, String nickname){
+		 User user = new User();
+		 user.setId(id);
+		 user.setPassword(password);
+		 user.setNickname(nickname);
+		 user.setRole(Role.CUSTOMER);
+		 return user;
+	}
+
+	public static User ofOwner(String id, String password, Store store){
+		User user = new User();
+		user.setId(id);
+		user.setPassword(password);
+		user.setStore(store);
+		user.setRole(Role.OWNER);
+		return user;
+	}
+
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
