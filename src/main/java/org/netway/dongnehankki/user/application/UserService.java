@@ -1,6 +1,7 @@
 package org.netway.dongnehankki.user.application;
 
 import lombok.RequiredArgsConstructor;
+import org.netway.dongnehankki.global.auth.CustomUserDetails;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
 import org.netway.dongnehankki.global.auth.jwt.RefreshToken;
 import org.netway.dongnehankki.global.auth.jwt.RefreshTokenRepository;
@@ -109,9 +110,9 @@ public class UserService {
                 .orElseThrow(UnregisteredUserException::new);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                new org.springframework.security.core.userdetails.User(user.getId(), "", user.getAuthorities()),
+                new CustomUserDetails(user),
                 "",
-                user.getAuthorities()
+                new CustomUserDetails(user).getAuthorities()
         );
 
         String newAccessToken = jwtTokenProvider.generateToken(authentication);
