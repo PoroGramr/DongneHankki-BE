@@ -1,4 +1,4 @@
-package org.netway.dongnehankki.user.application.dto.singup;
+package org.netway.dongnehankki.user.application.dto.singUp;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,6 +1,5 @@
 package org.netway.dongnehankki.user.application;
 
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
 import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
@@ -8,10 +7,10 @@ import org.netway.dongnehankki.global.exception.user.UnregisteredStoreException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
 import org.netway.dongnehankki.user.application.dto.response.UserResponse;
 import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
-import org.netway.dongnehankki.user.application.dto.singup.CustomerSingUpRequest;
-import org.netway.dongnehankki.user.application.dto.singup.OwnerSingUpRequest;
+import org.netway.dongnehankki.user.application.dto.singUp.CustomerSingUpRequest;
+import org.netway.dongnehankki.user.application.dto.singUp.OwnerSingUpRequest;
 import org.netway.dongnehankki.user.domain.User;
-import org.netway.dongnehankki.user.imfrastructure.UserRepository;
+import org.netway.dongnehankki.user.infrastructure.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package org.netway.dongnehankki.user.imfrastructure;
+package org.netway.dongnehankki.user.infrastructure;
 
 import java.util.Optional;
 import org.netway.dongnehankki.user.domain.User;
