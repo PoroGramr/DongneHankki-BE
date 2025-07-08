@@ -47,7 +47,7 @@ public class UserControllerTest {
         when(userService.customerJoin(any(CustomerSingUpRequest.class))).thenReturn(mock(
             UserResponse.class));
 
-        mockMvc.perform(post("/api/user/customer")
+        mockMvc.perform(post("/api/customers")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsBytes(new CustomerSingUpRequest(id, password,nickname)))
             .with(csrf())
@@ -62,7 +62,7 @@ public class UserControllerTest {
         String nickname = "nickname";
         Long storeId = 1L;
 
-        mockMvc.perform(post("/api/user/owner")
+        mockMvc.perform(post("/api/owners")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(new OwnerSingUpRequest(id,password,nickname,storeId)))
                 .with(csrf())
@@ -93,7 +93,7 @@ public class UserControllerTest {
 
         when(userService.login(any(LoginRequest.class))).thenReturn("test_token");
 
-        mockMvc.perform(post("/api/user/login")
+        mockMvc.perform(post("/api/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(new LoginRequest(id, password)))
                 .with(csrf())
@@ -108,7 +108,7 @@ public class UserControllerTest {
 
         when(userService.login(any(LoginRequest.class))).thenThrow(new UnregisteredUserException());
 
-        mockMvc.perform(post("/api/user/login")
+        mockMvc.perform(post("/api/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(new LoginRequest(id, password)))
                 .with(csrf())
@@ -123,7 +123,7 @@ public class UserControllerTest {
 
         when(userService.login(any(LoginRequest.class))).thenThrow(new UnregisteredUserException());
 
-        mockMvc.perform(post("/api/user/login")
+        mockMvc.perform(post("/api/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(new LoginRequest(id, password)))
                 .with(csrf())

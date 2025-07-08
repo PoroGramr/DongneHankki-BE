@@ -54,8 +54,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(SWAGGER_URLS).permitAll()
                 .requestMatchers("/", "/login").permitAll()
-                .requestMatchers("/api/user/customer").permitAll()
-                .requestMatchers("/api/user/owner").permitAll()
+                .requestMatchers("/api/customers").permitAll()
+                .requestMatchers("/api/owners").permitAll()
                 .requestMatchers("/api/user/login").permitAll()
                 .anyRequest().authenticated()
             )

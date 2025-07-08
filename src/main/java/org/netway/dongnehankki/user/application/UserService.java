@@ -2,6 +2,8 @@ package org.netway.dongnehankki.user.application;
 
 import lombok.RequiredArgsConstructor;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
+import org.netway.dongnehankki.global.exception.CustomException;
+import org.netway.dongnehankki.global.exception.ErrorCode;
 import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredStoreException;
 import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
@@ -49,7 +51,7 @@ public class UserService {
         });
 
         Store store = storeRepository.findByStoreId(ownerSingUpRequest.getStoreId())
-                .orElseThrow(() -> new UnregisteredStoreException());
+                .orElseThrow(() -> new CustomException(ErrorCode.UNREGISTERED_STORE));
 
         String encodedPassword = passwordEncoder.encode(ownerSingUpRequest.getPassword());
         User user = userRepository.save(User.ofOwner(ownerSingUpRequest.getId(), encodedPassword, ownerSingUpRequest.getNickname(), store));

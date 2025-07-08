@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/customer")
+    @PostMapping("/customers")
     public  ResponseEntity<ApiResponse<CustomerSingUpRequest>> customerJoin(@RequestBody CustomerSingUpRequest customerSingUpRequest){
         userService.customerJoin(customerSingUpRequest);
         return ResponseEntity.ok(ApiResponse.success());
     }
 
-    @PostMapping("/owner")
+    @PostMapping("/owners")
     public  ResponseEntity<ApiResponse<OwnerSingUpRequest>> ownerJoin(@RequestBody OwnerSingUpRequest ownerSingUpRequest){
         userService.ownerJoin(ownerSingUpRequest);
         return ResponseEntity.ok(ApiResponse.success());
