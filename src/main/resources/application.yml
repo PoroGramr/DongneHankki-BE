@@ -25,10 +25,6 @@ jwt:
   secret : ${SERVER_SECRET}
   access-token-expiration-minutes: ${SERVER_EXPIRATION}
 
-app:
-  cookie:
-    secure: false
-
 ---
 spring:
   config:
