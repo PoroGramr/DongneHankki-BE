@@ -13,7 +13,8 @@ public enum ErrorCode {
 
 	// User
 	DUPLICATE_USERNAME("401", "이미 사용 중인 유저 이름입니다.", HttpStatus.BAD_REQUEST),
-	UNREGISTERED_USER("401", "가입되지 않은 id,pw 입니다,", HttpStatus.UNAUTHORIZED);
+	UNREGISTERED_USER("401", "가입되지 않은 id,pw 입니다", HttpStatus.UNAUTHORIZED),
+	UNREGISTERED_STORE("401", "존재하지 않는 가게 입니다.", HttpStatus.UNAUTHORIZED);
 
 	private final HttpStatus status;
 	private final String code;

@@ -60,10 +60,11 @@ public class User extends BaseEntity {
 		 return user;
 	}
 
-	public static User ofOwner(String id, String password, Store store){
+	public static User ofOwner(String id, String password, String nickname, Store store){
 		User user = new User();
 		user.setId(id);
 		user.setPassword(password);
+		user.setNickname(nickname);
 		user.setStore(store);
 		user.setRole(Role.OWNER);
 		return user;
