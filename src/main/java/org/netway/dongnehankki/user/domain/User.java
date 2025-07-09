@@ -19,15 +19,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,22 +53,19 @@ public class User extends BaseEntity {
 		OWNER, CUSTOMER, ADMIN
 	}
 
+	public User(String id, String password, String nickname, Role role, Store store) {
+		this.id = id;
+		this.password = password;
+		this.nickname = nickname;
+		this.role = role;
+		this.store = store;
+	}
+
 	public static User ofCustomer(String id, String password, String nickname){
-		return User.builder()
-			.id(id)
-			.password(password)
-			.nickname(nickname)
-			.role(Role.CUSTOMER)
-			.build();
+		return new User(id, password, nickname, Role.CUSTOMER, null);
 	}
 
 	public static User ofOwner(String id, String password, String nickname, Store store){
-		return User.builder()
-			.id(id)
-			.password(password)
-			.nickname(nickname)
-			.store(store)
-			.role(Role.OWNER)
-			.build();
+		return new User(id, password, nickname, Role.OWNER, store);
 	}
 }
