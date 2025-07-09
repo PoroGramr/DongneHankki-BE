@@ -1,7 +1,7 @@
 package org.netway.dongnehankki.global.auth;
 
-import org.netway.dongnehankki.global.auth.jwt.JwtAccessDeniedHandler;
-import org.netway.dongnehankki.global.auth.jwt.JwtAuthenticationEntryPoint;
+import org.netway.dongnehankki.global.auth.jwt.JwtAuthorizationHandler;
+import org.netway.dongnehankki.global.auth.jwt.JwtAuthenticationHandler;
 import org.netway.dongnehankki.global.auth.jwt.JwtAuthenticationFilter;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
@@ -22,14 +22,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final JwtAuthenticationHandler jwtAuthenticationHandler;
+    private final JwtAuthorizationHandler jwtAuthorizationHandler;
     private final UserDetailsService userDetailsService;
 
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtAccessDeniedHandler jwtAccessDeniedHandler, UserDetailsService userDetailsService) {
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider, JwtAuthenticationHandler jwtAuthenticationHandler, JwtAuthorizationHandler jwtAuthorizationHandler, UserDetailsService userDetailsService) {
         this.jwtTokenProvider = jwtTokenProvider;
-        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
-        this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
+        this.jwtAuthenticationHandler = jwtAuthenticationHandler;
+        this.jwtAuthorizationHandler = jwtAuthorizationHandler;
         this.userDetailsService = userDetailsService;
     }
 
@@ -45,8 +45,8 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .exceptionHandling(exceptionHandling -> exceptionHandling
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                .accessDeniedHandler(jwtAccessDeniedHandler)
+                .authenticationEntryPoint(jwtAuthenticationHandler)
+                .accessDeniedHandler(jwtAuthorizationHandler)
             )
             .sessionManagement(sessionManagement -> sessionManagement
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

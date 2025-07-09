@@ -23,13 +23,13 @@ public class UserController {
 
     @PostMapping("/customers")
     public ResponseEntity<ApiResponse<Void>> signUpCustomer(@RequestBody CustomerSignUpRequest customerSignUpRequest) {
-        userService.customerJoin(customerSignUpRequest);
+        userService.customerSignUp(customerSignUpRequest);
         return ResponseEntity.ok(ApiResponse.success());
     }
 
     @PostMapping("/owners")
     public ResponseEntity<ApiResponse<Void>> signUpOwner(@RequestBody OwnerSignUpRequest ownerSignUpRequest) {
-        userService.ownerJoin(ownerSignUpRequest);
+        userService.ownerSignUp(ownerSignUpRequest);
         return ResponseEntity.ok(ApiResponse.success());
     }
 

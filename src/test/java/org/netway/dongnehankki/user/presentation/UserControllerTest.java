@@ -46,7 +46,7 @@ public class UserControllerTest {
         String password = "password";
         String nickname = "nickname";
 
-        when(userService.customerJoin(any(CustomerSignUpRequest.class))).thenReturn(mock(
+        when(userService.customerSignUp(any(CustomerSignUpRequest.class))).thenReturn(mock(
             UserResponse.class));
 
         mockMvc.perform(post("/api/customers")
@@ -78,7 +78,7 @@ public class UserControllerTest {
         String password = "password";
         String nickname = "nickname";
 
-        when(userService.customerJoin(any(CustomerSignUpRequest.class))).thenThrow(new DuplicateUserNameException());
+        when(userService.customerSignUp(any(CustomerSignUpRequest.class))).thenThrow(new DuplicateUserNameException());
 
         mockMvc.perform(post("/api/customers")
                 .contentType(MediaType.APPLICATION_JSON)

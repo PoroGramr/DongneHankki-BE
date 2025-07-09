@@ -68,7 +68,7 @@ public class UserServiceTest {
         when(userRepository.save(any())).thenReturn(CustomerUserFixture.get(id, password));
         when(passwordEncoder.encode(password)).thenReturn("encodedPassword");
 
-        Assertions.assertDoesNotThrow(() -> userService.customerJoin(new CustomerSignUpRequest(id,password,nickname)));
+        Assertions.assertDoesNotThrow(() -> userService.customerSignUp(new CustomerSignUpRequest(id,password,nickname)));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class UserServiceTest {
         when(mockStore.getStoreId()).thenReturn(storeId);
         when(storeRepository.findByStoreId(storeId)).thenReturn(Optional.of(mockStore));
 
-        Assertions.assertDoesNotThrow(() -> userService.ownerJoin(new OwnerSignUpRequest(id,password,nickname,storeId)));
+        Assertions.assertDoesNotThrow(() -> userService.ownerSignUp(new OwnerSignUpRequest(id,password,nickname,storeId)));
     }
 
     @Test
@@ -98,7 +98,7 @@ public class UserServiceTest {
 
         when(userRepository.findById(id)).thenReturn(Optional.of(fixture));
 
-        Assertions.assertThrows(DuplicateUserNameException.class, () -> userService.customerJoin(new CustomerSignUpRequest(id,password,nickname)));
+        Assertions.assertThrows(DuplicateUserNameException.class, () -> userService.customerSignUp(new CustomerSignUpRequest(id,password,nickname)));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class UserServiceTest {
         when(mockStore.getStoreId()).thenReturn(storeId);
         when(storeRepository.findByStoreId(storeId)).thenReturn(Optional.of(mockStore));
 
-        Assertions.assertThrows(DuplicateUserNameException.class, () -> userService.ownerJoin(new OwnerSignUpRequest(id,password,nickname,storeId)));
+        Assertions.assertThrows(DuplicateUserNameException.class, () -> userService.ownerSignUp(new OwnerSignUpRequest(id,password,nickname,storeId)));
     }
 
     @Test

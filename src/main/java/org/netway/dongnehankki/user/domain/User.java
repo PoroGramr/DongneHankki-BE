@@ -53,7 +53,7 @@ public class User extends BaseEntity {
 		OWNER, CUSTOMER, ADMIN
 	}
 
-	public User(String id, String password, String nickname, Role role, Store store) {
+	private User(String id, String password, String nickname, Role role, Store store) {
 		this.id = id;
 		this.password = password;
 		this.nickname = nickname;

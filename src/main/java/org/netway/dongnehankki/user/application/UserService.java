@@ -39,7 +39,7 @@ public class UserService {
     private final StoreRepository storeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public UserResponse customerJoin(CustomerSignUpRequest customerSignUpRequest){
+    public UserResponse customerSignUp(CustomerSignUpRequest customerSignUpRequest){
         userRepository.findById(customerSignUpRequest.getId()).ifPresent(it -> {
             throw new DuplicateUserNameException();
         });
@@ -50,7 +50,7 @@ public class UserService {
         return UserResponse.fromEntity(user);
     }
 
-    public UserResponse ownerJoin(OwnerSignUpRequest ownerSignUpRequest) {
+    public UserResponse ownerSignUp(OwnerSignUpRequest ownerSignUpRequest) {
         userRepository.findById(ownerSignUpRequest.getId()).ifPresent(it -> {
             throw new DuplicateUserNameException();
         });
@@ -84,7 +84,7 @@ public class UserService {
         refreshTokenRepository.save(RefreshToken.builder()
                 .userId(user.getUserId())
                 .token(refreshToken)
-                .expiration(jwtTokenProvider.getRefreshTokenExpirationMinutes() * 60) // 초 단위로 저장
+                .expiration(jwtTokenProvider.getRefreshTokenExpirationMinutes() * 60)
                 .build());
 
         return new LoginResponse(accessToken, refreshToken);
