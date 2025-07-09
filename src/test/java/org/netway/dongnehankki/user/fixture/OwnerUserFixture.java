@@ -7,12 +7,13 @@ public class OwnerUserFixture {
 
     // Test시 사용하는 가짜 User Entity
     public static User get(String id, String password, Store store){
-        User result = new User();
-        result.setUserId(1L);
-        result.setId(id);
-        result.setPassword(password);
-        result.setStore(store);
-        return result;
+        return User.builder()
+                .userId(1L)
+                .id(id)
+                .password(password)
+                .store(store)
+                .role(User.Role.OWNER)
+                .build();
     }
 
 }

@@ -1,4 +1,4 @@
-package org.netway.dongnehankki.user.application.dto.response;
+package org.netway.dongnehankki.user.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

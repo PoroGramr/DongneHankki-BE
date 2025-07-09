@@ -17,12 +17,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,8 +38,6 @@ public class User extends BaseEntity {
 	private String password;
 
 	private String nickname;
-
-	private String refreshToken;
 
 	@Enumerated(EnumType.STRING)
 	private Role role;
@@ -54,45 +57,21 @@ public class User extends BaseEntity {
 	}
 
 	public static User ofCustomer(String id, String password, String nickname){
-		 User user = new User();
-		 user.setId(id);
-		 user.setPassword(password);
-		 user.setNickname(nickname);
-		 user.setRole(Role.CUSTOMER);
-		 return user;
+		return User.builder()
+			.id(id)
+			.password(password)
+			.nickname(nickname)
+			.role(Role.CUSTOMER)
+			.build();
 	}
 
 	public static User ofOwner(String id, String password, String nickname, Store store){
-		User user = new User();
-		user.setId(id);
-		user.setPassword(password);
-		user.setNickname(nickname);
-		user.setStore(store);
-		user.setRole(Role.OWNER);
-		return user;
-	}
-
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public void setNickname(String nickname) {
-		this.nickname = nickname;
-	}
-
-	public void setRole(Role role) {
-		this.role = role;
-	}
-
-	public void setStore(Store store) {
-		this.store = store;
+		return User.builder()
+			.id(id)
+			.password(password)
+			.nickname(nickname)
+			.store(store)
+			.role(Role.OWNER)
+			.build();
 	}
 }

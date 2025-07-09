@@ -10,15 +10,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
-import org.netway.dongnehankki.global.exception.user.InvalidPasswordException;
-import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
+import org.netway.dongnehankki.user.exception.DuplicateUserNameException;
+import org.netway.dongnehankki.user.exception.InvalidPasswordException;
+import org.netway.dongnehankki.user.exception.UnregisteredUserException;
 import org.netway.dongnehankki.user.application.UserService;
-import org.netway.dongnehankki.user.application.dto.login.LoginResponse;
-import org.netway.dongnehankki.user.application.dto.response.UserResponse;
-import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
-import org.netway.dongnehankki.user.application.dto.signUp.CustomerSignUpRequest;
-import org.netway.dongnehankki.user.application.dto.signUp.OwnerSignUpRequest;
+import org.netway.dongnehankki.user.dto.login.LoginResponse;
+import org.netway.dongnehankki.user.dto.response.UserResponse;
+import org.netway.dongnehankki.user.dto.login.LoginRequest;
+import org.netway.dongnehankki.user.dto.signUp.CustomerSignUpRequest;
+import org.netway.dongnehankki.user.dto.signUp.OwnerSignUpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;

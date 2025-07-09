@@ -5,16 +5,16 @@ import org.netway.dongnehankki.global.auth.CustomUserDetails;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
 import org.netway.dongnehankki.global.auth.jwt.RefreshToken;
 import org.netway.dongnehankki.global.auth.jwt.RefreshTokenRepository;
-import org.netway.dongnehankki.global.exception.user.DuplicateUserNameException;
-import org.netway.dongnehankki.global.exception.user.InvalidPasswordException;
+import org.netway.dongnehankki.user.exception.DuplicateUserNameException;
+import org.netway.dongnehankki.user.exception.InvalidPasswordException;
 import org.netway.dongnehankki.global.exception.store.UnregisteredStoreException;
-import org.netway.dongnehankki.global.exception.user.InvalidRefreshTokenException;
-import org.netway.dongnehankki.global.exception.user.UnregisteredUserException;
-import org.netway.dongnehankki.user.application.dto.response.UserResponse;
-import org.netway.dongnehankki.user.application.dto.login.LoginRequest;
-import org.netway.dongnehankki.user.application.dto.login.LoginResponse;
-import org.netway.dongnehankki.user.application.dto.signUp.CustomerSignUpRequest;
-import org.netway.dongnehankki.user.application.dto.signUp.OwnerSignUpRequest;
+import org.netway.dongnehankki.user.exception.InvalidRefreshTokenException;
+import org.netway.dongnehankki.user.exception.UnregisteredUserException;
+import org.netway.dongnehankki.user.dto.response.UserResponse;
+import org.netway.dongnehankki.user.dto.login.LoginRequest;
+import org.netway.dongnehankki.user.dto.login.LoginResponse;
+import org.netway.dongnehankki.user.dto.signUp.CustomerSignUpRequest;
+import org.netway.dongnehankki.user.dto.signUp.OwnerSignUpRequest;
 import org.netway.dongnehankki.user.domain.User;
 import org.netway.dongnehankki.user.infrastructure.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,7 +26,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 
 import org.netway.dongnehankki.store.domain.Store;
-import org.netway.dongnehankki.store.imfrastructure.StoreRepository;
+import org.netway.dongnehankki.store.infrastructure.StoreRepository;
 
 @Service
 @RequiredArgsConstructor

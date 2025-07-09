@@ -6,12 +6,12 @@ public class CustomerUserFixture {
 
     // Test시 사용하는 가짜 User Entity
     public static User get(String id, String password){
-        User result = new User();
-        result.setUserId(1L);
-        result.setId(id);
-        result.setPassword(password);
-        result.setRole(User.Role.CUSTOMER);
-        return result;
+        return User.builder()
+                .userId(1L)
+                .id(id)
+                .password(password)
+                .role(User.Role.CUSTOMER)
+                .build();
     }
 
 }
