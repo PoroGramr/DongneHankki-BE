@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.netway.dongnehankki.user.domain.User;
+import org.netway.dongnehankki.user.domain.User.Role;
 import org.netway.dongnehankki.user.exception.DuplicateUserNameException;
 import org.netway.dongnehankki.user.exception.InvalidPasswordException;
 import org.netway.dongnehankki.user.exception.UnregisteredUserException;
@@ -138,7 +139,7 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser
-    public void 단일__고객_회원_조회() throws Exception{
+    public void 단일_고객_회원_조회() throws Exception{
 
         Long userId = 1L;
         UserResponse mockUserResponse = new UserResponse(userId, "testId", "testNickname", User.Role.CUSTOMER, null);
@@ -148,8 +149,24 @@ public class UserControllerTest {
                 .with(csrf())
             ).andDo(print())
             .andExpect(status().isOk());
-
     }
+
+    @Test
+    @WithMockUser
+    public void 단일_점주_회원_조회() throws Exception{
+
+        Long userId = 1L;
+        UserResponse.StoreInfo mockStoreInfo = new UserResponse.StoreInfo(100L, "테스트 가게");
+        UserResponse mockUserResponse = new UserResponse(userId, "testId", "testNickname", Role.OWNER, mockStoreInfo);
+        when(userService.findByUserId(any(Long.class))).thenReturn(mockUserResponse);
+
+        mockMvc.perform(get("/api/users/{userId}", userId)
+                .with(csrf())
+            ).andDo(print())
+            .andExpect(status().isOk());
+    }
+
+
 
 
 
