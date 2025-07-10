@@ -1,7 +1,7 @@
 package org.netway.dongnehankki.user.dto.response;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+// import lombok.Getter;
 import org.netway.dongnehankki.store.domain.Store;
 import org.netway.dongnehankki.user.domain.User;
 import org.netway.dongnehankki.user.domain.User.Role;
@@ -15,11 +15,21 @@ public class UserResponse {
     private Role role;
     private StoreInfo store;
 
-    @Getter
+    public Long getUserId() { return userId; }
+    public String getId() { return id; }
+    public String getNickname() { return nickname; }
+    public Role getRole() { return role; }
+    public StoreInfo getStore() { return store; }
+
+
     @AllArgsConstructor
-    private static class StoreInfo {
+    public static class StoreInfo {
         private Long storeId;
         private String name;
+
+        public Long getStoreId() { return storeId; }
+        public String getName() { return name; }
+
         static StoreInfo fromEntity(Store store) {
             return new StoreInfo(store.getStoreId(), store.getName());
         }
@@ -39,7 +49,4 @@ public class UserResponse {
             storeInfo
         );
     }
-
-
-
 }

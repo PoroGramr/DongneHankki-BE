@@ -4,12 +4,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.netway.dongnehankki.user.domain.User;
 import org.netway.dongnehankki.user.exception.DuplicateUserNameException;
 import org.netway.dongnehankki.user.exception.InvalidPasswordException;
 import org.netway.dongnehankki.user.exception.UnregisteredUserException;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -131,6 +134,21 @@ public class UserControllerTest {
                 .with(csrf())
             ).andDo(print())
             .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    public void 단일__고객_회원_조회() throws Exception{
+
+        Long userId = 1L;
+        UserResponse mockUserResponse = new UserResponse(userId, "testId", "testNickname", User.Role.CUSTOMER, null);
+        when(userService.findByUserId(any(Long.class))).thenReturn(mockUserResponse);
+
+        mockMvc.perform(get("/api/users/{userId}", userId)
+                .with(csrf())
+            ).andDo(print())
+            .andExpect(status().isOk());
+
     }
 
 
