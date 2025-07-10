@@ -166,6 +166,19 @@ public class UserControllerTest {
             .andExpect(status().isOk());
     }
 
+    @Test
+    @WithMockUser
+    public void 없는_회원_조회시_에러반환() throws Exception{
+
+        Long userId = 1L;
+        when(userService.findByUserId(any(Long.class))).thenThrow(new UnregisteredUserException());
+
+        mockMvc.perform(get("/api/users/{userId}", userId)
+                .with(csrf())
+            ).andDo(print())
+            .andExpect(status().isUnauthorized());
+    }
+
 
 
 
