@@ -5,6 +5,7 @@ import org.netway.dongnehankki.analytics.application.AnalyticsService;
 import org.netway.dongnehankki.notification.application.NotificationSchedulingService;
 import org.netway.dongnehankki.post.application.VertexAIService;
 import org.netway.dongnehankki.store.application.ChunCheonStoreService;
+import org.netway.dongnehankki.store.application.StoreService;
 import org.netway.dongnehankki.store.application.StoreSyncService;
 import org.netway.dongnehankki.store.infrastructure.external.AddressApiClient;
 import org.netway.dongnehankki.store.infrastructure.external.ChunCheonOpenApiClient;
@@ -24,6 +25,9 @@ class DongneHankkiBeApplicationTests {
 
 	@MockitoBean
 	private StoreSyncService storeSyncService;
+
+    @MockitoBean
+    private StoreService storeService;
 
 	@MockitoBean
 	private ChunCheonStoreService chunCheonStoreService;

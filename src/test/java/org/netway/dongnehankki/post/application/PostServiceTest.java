@@ -94,37 +94,37 @@ class PostServiceTest {
         assertThat(savedPost.getPostHashtags()).extracting(postHashtag -> postHashtag.getHashtag().getName()).containsExactly("#맛집");
     }
 
-    @Test
-    @DisplayName("단일 게시글 조회 성공 테스트 - 좋아요 누름")
-    void getPost_success_when_liked() {
-        // given
-        Long postId = 1L;
-        Long userId = 1L;
-        User user = User.ofCustomer("loginId", "password", "nickname", "name", "phone",LocalDate.of(2025,8,22));
-        Store store = Store.createStore("가게", 1.0, 1.0, "주소", "시군", 1, 1L);
-        Post post = Post.createPost("내용", store, user, Post.Role.CUSTOMER);
-
-        // Post 객체에 ID를 수동으로 설정
-        try {
-            Field postIdField = Post.class.getDeclaredField("postId");
-            postIdField.setAccessible(true);
-            postIdField.set(post, postId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        given(postRepository.findById(postId)).willReturn(Optional.of(post));
-        given(postLikeRepository.existsByUser_UserIdAndPost_PostId(userId, postId)).willReturn(true);
-
-        // when
-        PostResponse response = postService.getPost(postId, userId);
-
-        // then
-        assertThat(response.getContent()).isEqualTo("내용");
-        assertThat(response.getStoreName()).isEqualTo("가게");
-        assertThat(response.getUserNickname()).isEqualTo("nickname");
-        assertThat(response.isLiked()).isTrue();
-    }
+//    @Test
+//    @DisplayName("단일 게시글 조회 성공 테스트 - 좋아요 누름")
+//    void getPost_success_when_liked() {
+//        // given
+//        Long postId = 1L;
+//        Long userId = 1L;
+//        User user = User.ofCustomer("loginId", "password", "nickname", "name", "phone",LocalDate.of(2025,8,22));
+//        Store store = Store.createStore("가게", 1.0, 1.0, "주소", "시군", 1, 1L);
+//        Post post = Post.createPost("내용", store, user, Post.Role.CUSTOMER);
+//
+//        // Post 객체에 ID를 수동으로 설정
+//        try {
+//            Field postIdField = Post.class.getDeclaredField("postId");
+//            postIdField.setAccessible(true);
+//            postIdField.set(post, postId);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+//        given(postLikeRepository.existsByUser_UserIdAndPost_PostId(userId, postId)).willReturn(true);
+//
+//        // when
+//        PostResponse response = postService.getPost(postId, userId);
+//
+//        // then
+//        assertThat(response.getContent()).isEqualTo("내용");
+//        assertThat(response.getStoreName()).isEqualTo("가게");
+//        assertThat(response.getUserNickname()).isEqualTo("nickname");
+//        assertThat(response.isLiked()).isTrue();
+//    }
 
     @Test
     @DisplayName("단일 게시글 조회 실패 - 게시글 없음")

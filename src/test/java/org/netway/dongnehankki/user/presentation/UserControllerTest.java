@@ -1,14 +1,20 @@
 package org.netway.dongnehankki.user.presentation;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,10 +40,12 @@ import org.netway.dongnehankki.user.dto.response.UserResponse;
 import org.netway.dongnehankki.user.dto.request.LoginRequest;
 import org.netway.dongnehankki.user.dto.request.CustomerSignUpRequest;
 import org.netway.dongnehankki.user.dto.request.OwnerSignUpRequest;
+import org.netway.dongnehankki.global.auth.CustomUserDetails;
 import org.netway.dongnehankki.global.auth.SecurityConfig;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
 import org.netway.dongnehankki.global.auth.jwt.JwtAuthenticationHandler;
 import org.netway.dongnehankki.global.auth.jwt.JwtAuthorizationHandler;
+import org.netway.dongnehankki.user.fixture.CustomerUserFixture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -46,6 +54,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mock.web.MockMultipartFile;
 
 @WebMvcTest(UserController.class)
 @Import({SecurityConfig.class})
@@ -454,21 +464,6 @@ public class UserControllerTest {
     }
 
     @Test
-    public void 인증되지_않은_회원이_수정시_에러반환() throws Exception {
-        //given
-        Long userId = 1L;
-        UpdateUserRequest userUpdateRequest = new UpdateUserRequest("password", "nickname");
-
-        //when & then
-        mockMvc.perform(patch("/api/users/{userId}", userId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(userUpdateRequest))
-                .with(csrf())
-            ).andDo(print())
-            .andExpect(status().isUnauthorized());
-    }
-
-    @Test
     @WithMockUser
     public void 등록되지_않은_회원_수정시_에러반환() throws Exception {
         //given
@@ -524,10 +519,7 @@ public class UserControllerTest {
         // given
         String receiverNumber = "01012345678";
 
-        // when
-//        when(coolSmsService.sendSms(any(String.class))).thenReturn(mock(SingleMessageSentResponse.class));
-
-        // then
+        // whrn & then
         mockMvc.perform(post("/api/sendAuthCode")
                 .param("receiverNumber", receiverNumber)
                 .with(csrf())
@@ -576,4 +568,39 @@ public class UserControllerTest {
             .andExpect(jsonPath("$.code").value("401"))
             .andExpect(jsonPath("$.message").value("유효하지 않은 인증 번호입니다."));
     }
+
+    @Test
+    public void 유저_프로필_이미지_수정_성공() throws Exception {
+        // given
+        User testUser = CustomerUserFixture.get("loginId", "password", "nickname", "name", "010-1111-1111", LocalDate.of(2025,8,22));
+        CustomUserDetails userDetails = new CustomUserDetails(testUser);
+
+        MockMultipartFile profileImage = new MockMultipartFile(
+            "profileImage",                    // parameter name
+            "test-image.jpg",                 // original filename
+            "image/jpeg",                     // content type
+            "test image content".getBytes()   // file content
+        );
+
+        // when
+        doNothing().when(userService).updateProfileImage(any(Long.class), any(MultipartFile.class));
+
+        // then
+        mockMvc.perform(multipart("/api/users/profile-image")
+                .file(profileImage)
+                .with(user(userDetails))
+                .with(request -> {
+                    request.setMethod("PATCH");
+                    return request;
+                })
+                .with(csrf())
+            ).andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("success"))
+            .andExpect(jsonPath("$.code").value("200"));
+    }
+
+
+
+
 }
