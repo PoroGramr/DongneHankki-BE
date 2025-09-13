@@ -5,12 +5,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
 import org.netway.dongnehankki.global.auth.jwt.RefreshToken;
 import org.netway.dongnehankki.global.auth.jwt.RefreshTokenRepository;
+import org.netway.dongnehankki.notification.dto.request.FCMTokenRequest;
+import org.netway.dongnehankki.global.util.S3Service;
 import org.netway.dongnehankki.store.exception.UnregisteredStoreException;
 import org.netway.dongnehankki.store.infrastructure.repository.ReviewRepository;
 import org.netway.dongnehankki.user.dto.request.UpdateUserRequest;
@@ -39,6 +45,7 @@ import org.netway.dongnehankki.user.domain.User;
 import org.netway.dongnehankki.user.fixture.CustomerUserFixture;
 import org.netway.dongnehankki.user.fixture.OwnerUserFixture;
 import org.netway.dongnehankki.user.infrastructure.UserRepository;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -74,6 +81,9 @@ public class UserServiceTest {
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
 
+    @Mock
+    private S3Service s3Service;
+
     @Test
     void 일반회원_회원가입이_정상적으로_동작하는경우() {
         // given
@@ -105,7 +115,7 @@ public class UserServiceTest {
         Store mockStore = mock(Store.class);
 
         when(userRepository.findByLoginId(loginId)).thenReturn(Optional.empty());
-        when(userRepository.save(any())).thenReturn(OwnerUserFixture.get(loginId, password, name, phoneNumber, mockStore, birth));
+        when(userRepository.save(any())).thenReturn(OwnerUserFixture.get(loginId, password,nickname ,name, phoneNumber, mockStore, birth));
         when(passwordEncoder.encode(password)).thenReturn("encodedPassword");
         when(mockStore.getStoreId()).thenReturn(storeId);
         when(storeRepository.findByStoreId(storeId)).thenReturn(Optional.of(mockStore));
@@ -221,7 +231,7 @@ public class UserServiceTest {
         LocalDate birth = LocalDate.of(2025,8,22);
         Store mockStore = mock(Store.class);
 
-        User fixture = OwnerUserFixture.get(loginId, password, name, phoneNumber, mockStore,birth);
+        User fixture = OwnerUserFixture.get(loginId, password, nickname, name, phoneNumber, mockStore,birth);
 
         when(userRepository.findByLoginId(loginId)).thenReturn(Optional.of(fixture));
 
@@ -240,15 +250,7 @@ public class UserServiceTest {
         LocalDate birth = LocalDate.of(2025,8,22);
         Long userId = 1L;
 
-        User fixture = CustomerUserFixture.get(loginId, password,nickname, name, phoneNumber,birth);
-        // userId 설정 (Reflection 사용)
-        try {
-            java.lang.reflect.Field field = User.class.getDeclaredField("userId");
-            field.setAccessible(true);
-            field.set(fixture, userId);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        User fixture = CustomerUserFixture.get(userId, loginId, password,nickname, name, phoneNumber,birth);
         
         when(userRepository.findByLoginId(loginId)).thenReturn(Optional.of(fixture));
 
@@ -370,7 +372,7 @@ public class UserServiceTest {
     void 고객_회원_수정이_성공적으로_동작하는_경우() {
 
         // given
-        User existingUser = User.ofCustomer("loginId", "oldPass", "oldNick" ,"oldName", "010-1111-1111", LocalDate.of(2025,8,22));
+        User existingUser = CustomerUserFixture.get(null, "loginId", "oldPass", "oldNick" ,"oldName", "010-1111-1111", LocalDate.of(2025,8,22));
         // anyLong() 사용
         given(userRepository.findById(anyLong()))
             .willReturn(Optional.of(existingUser));
@@ -394,7 +396,7 @@ public class UserServiceTest {
 
         // given
         Store mockStore = mock(Store.class);
-        User existingUser = User.ofOwner("loginId", "oldPass", "oldNick", "oldName", "010-1111-1111", mockStore,LocalDate.of(2025,8,22));
+                User existingUser = OwnerUserFixture.get(null, "loginId", "oldPass", "oldNick", "oldName", "010-1111-1111", mockStore,LocalDate.of(2025,8,22));
         // anyLong() 사용
         given(userRepository.findById(anyLong()))
             .willReturn(Optional.of(existingUser));
@@ -417,23 +419,9 @@ public class UserServiceTest {
     @Test
     void 다른_유저가_사용중인_닉네임을_사용하는_경우() {
         // given
-        User existingUser = User.ofCustomer("loginId", "oldPass", "oldNick", "oldName", "010-1111-1111",LocalDate.of(2025,8,22));
-        try {
-            Field field = User.class.getDeclaredField("userId");
-            field.setAccessible(true);
-            field.set(existingUser, 999L);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+                User existingUser = CustomerUserFixture.get(999L, "loginId", "oldPass", "oldNick", "oldName", "010-1111-1111",LocalDate.of(2025,8,22));
 
-        User anotherUser = User.ofCustomer("anotherLoginId", "pass", "newNick", "newName", "010-2222-2222",LocalDate.of(2025,8,22));
-        try {
-            Field field = User.class.getDeclaredField("userId");
-            field.setAccessible(true);
-            field.set(anotherUser, 1000L);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+                User anotherUser = CustomerUserFixture.get(1000L, "anotherLoginId", "pass", "newNick", "newName", "010-2222-2222",LocalDate.of(2025,8,22));
 
         given(userRepository.findById(999L)).willReturn(Optional.of(existingUser));
         given(userRepository.findByNickname("newNick")).willReturn(Optional.of(anotherUser));
@@ -449,14 +437,7 @@ public class UserServiceTest {
         // given
         long userId = 999L;
         String nickname = "myNick";
-        User existingUser = User.ofCustomer("loginId", "oldPass", nickname, "oldName", "010-1111-1111",LocalDate.of(2025,8,22));
-        try {
-            Field field = User.class.getDeclaredField("userId");
-            field.setAccessible(true);
-            field.set(existingUser, userId);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+                User existingUser = CustomerUserFixture.get(userId, "loginId", "oldPass", nickname, "oldName", "010-1111-1111",LocalDate.of(2025,8,22));
 
         given(userRepository.findById(userId)).willReturn(Optional.of(existingUser));
         given(userRepository.findByNickname(nickname)).willReturn(Optional.of(existingUser));
@@ -472,7 +453,7 @@ public class UserServiceTest {
     void 고객_회원_닉네임만_수정이_성공적으로_동작하는_경우() {
 
         // given
-        User existingUser = User.ofCustomer("loginId", "oldPass", "oldNick", "oldName", "010-1111-1111",LocalDate.of(2025,8,22));
+        User existingUser = CustomerUserFixture.get("loginId", "oldPass", "oldNick", "oldName", "010-1111-1111",LocalDate.of(2025,8,22));
         // anyLong() 사용
         given(userRepository.findById(anyLong()))
             .willReturn(Optional.of(existingUser));
@@ -494,7 +475,7 @@ public class UserServiceTest {
     void 고객_회원_패스워드만_수정이_성공적으로_동작하는_경우() {
 
         // given
-        User existingUser = User.ofCustomer("loginId", "oldPass", "oldNick","oldName", "010-1111-1111",LocalDate.of(2025,8,22));
+        User existingUser = CustomerUserFixture.get("loginId", "oldPass", "oldNick","oldName", "010-1111-1111",LocalDate.of(2025,8,22));
         // anyLong() 사용
         given(userRepository.findById(anyLong()))
             .willReturn(Optional.of(existingUser));
@@ -517,7 +498,7 @@ public class UserServiceTest {
     void 고객_회원_패스워드만_수정하려고_할때_닉네임은_기존_닉네임을_입력하는_경우_성공적으로_동작하는_경우() {
 
         // given
-        User existingUser = User.ofCustomer("loginId", "oldPass", "oldNick","oldName", "010-1111-1111",LocalDate.of(2025,8,22));
+        User existingUser = CustomerUserFixture.get("loginId", "oldPass", "oldNick","oldName", "010-1111-1111",LocalDate.of(2025,8,22));
         // anyLong() 사용
         given(userRepository.findById(anyLong()))
             .willReturn(Optional.of(existingUser));
@@ -540,7 +521,7 @@ public class UserServiceTest {
     void 유저_softDelete가_성공적으로_동작하는_경우(){
         // given
         long userId = 1L;
-        User existingUser = User.ofCustomer("loginId", "oldPass", "oldNick","oldName", "010-1111-1111",LocalDate.of(2025,8,22));
+        User existingUser = CustomerUserFixture.get("loginId", "oldPass", "oldNick","oldName", "010-1111-1111",LocalDate.of(2025,8,22));
 
         given(userRepository.findById(userId)).willReturn(Optional.of(existingUser));
         given(reviewRepository.findAllByUser(existingUser)).willReturn(Collections.emptyList());
@@ -572,7 +553,7 @@ public class UserServiceTest {
     void userId로_유저_정보_찾기_성공하는_경우(){
         // given
         long userId = 1L;
-        User existingUser = User.ofCustomer("loginId", "oldPass", "oldNick","oldName", "010-1111-1111",LocalDate.of(2025,8,22));
+        User existingUser = CustomerUserFixture.get("loginId", "oldPass", "oldNick","oldName", "010-1111-1111",LocalDate.of(2025,8,22));
         given(userRepository.findById(userId))
             .willReturn(Optional.of(existingUser));
 
@@ -629,5 +610,114 @@ public class UserServiceTest {
         Assertions.assertThrows(UnregisteredUserException.class, () -> {
             userService.reissueTokens(refreshToken);
         });
+    }
+
+    @Test
+    void 기존_프로필_이미지가_있는_유저가_이미지_변경시_기존_이미지_삭제_성공() {
+        // given
+        long userId = 1L;
+        String oldImageUrl = "http://s3.test.url/old-image.jpg";
+        String newImageUrl = "http://s3.test.url/new-image.jpg";
+
+        User existingUser = CustomerUserFixture.get(userId, "loginId", "pass", "nick", "name", "phone", LocalDate.now());
+        existingUser.updateProfileImage(oldImageUrl);
+
+        MockMultipartFile newProfileImage = new MockMultipartFile(
+            "profileImage", "new-image.jpg", "image/jpeg", "new image content".getBytes()
+        );
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(existingUser));
+        when(s3Service.uploadFile(any(), any())).thenReturn(newImageUrl);
+
+        // when
+        userService.updateProfileImage(userId, newProfileImage);
+
+        // then
+        verify(s3Service, times(1)).deleteFile(oldImageUrl);
+        assertThat(existingUser.getProfileImageUrl()).isEqualTo(newImageUrl);
+    }
+
+    @Test
+    void 기존_프로필_이미지_URL이_공백일때_삭제_호출하지_않음() {
+        // given
+        long userId = 1L;
+        String blankImageUrl = " ";
+        String newImageUrl = "http://s3.test.url/new-image.jpg";
+
+        User existingUser = CustomerUserFixture.get(userId, "loginId", "pass", "nick", "name", "phone", LocalDate.now());
+        existingUser.updateProfileImage(blankImageUrl);
+
+        MockMultipartFile newProfileImage = new MockMultipartFile(
+            "profileImage", "new-image.jpg", "image/jpeg", "new image content".getBytes()
+        );
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(existingUser));
+        when(s3Service.uploadFile(any(), any())).thenReturn(newImageUrl);
+
+        // when
+        userService.updateProfileImage(userId, newProfileImage);
+
+        // then
+        verify(s3Service, never()).deleteFile(any());
+        assertThat(existingUser.getProfileImageUrl()).isEqualTo(newImageUrl);
+    }
+
+    @Test
+    void FCM_토큰_업데이트_성공() throws Exception {
+        // given
+        long userId = 1L;
+        String fcmToken = "new-fcm-token";
+        String json = "{\"token\":\"" + fcmToken + "\"}";
+        FCMTokenRequest request = new ObjectMapper().readValue(json, FCMTokenRequest.class);
+
+        User existingUser = CustomerUserFixture.get(userId, "loginId", "pass", "nick", "name", "phone", LocalDate.now());
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(existingUser));
+
+        // when
+        userService.updateFcmToken(userId, request);
+
+        // then
+        assertThat(existingUser.getFcmToken()).isEqualTo(fcmToken);
+    }
+
+    @Test
+    void FCM_토큰_업데이트시_유저가_없으면_예외발생() throws Exception {
+        // given
+        long userId = 999L; // 존재하지 않는 ID
+        String fcmToken = "new-fcm-token";
+        String json = "{\"token\":\"" + fcmToken + "\"}";
+        FCMTokenRequest request = new ObjectMapper().readValue(json, FCMTokenRequest.class);
+
+        given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+        // when & then
+        Assertions.assertThrows(UnregisteredUserException.class, () -> {
+            userService.updateFcmToken(userId, request);
+        });
+    }
+
+    @Test
+    void 유저_프로필_이미지_설정_성공(){
+        // given
+        long userId = 1L;
+        User existingUser = CustomerUserFixture.get(userId, "loginId", "oldPass", "oldNick","oldName", "010-1111-1111",LocalDate.of(2025,8,22));
+        MockMultipartFile profileImage = new MockMultipartFile(
+            "profileImage",                    // parameter name
+            "test-image.jpg",                 // original filename
+            "image/jpeg",                     // content type
+            "test image content".getBytes()   // file content
+        );
+
+        given(userRepository.findById(userId))
+            .willReturn(Optional.of(existingUser));
+        when(s3Service.uploadFile(any(), any())).thenReturn("http://s3.test.url/image.jpg");
+
+
+        // when
+        userService.updateProfileImage(userId, profileImage);
+
+        // then
+        assertThat(existingUser.getProfileImageUrl()).isEqualTo("http://s3.test.url/image.jpg");
     }
 }

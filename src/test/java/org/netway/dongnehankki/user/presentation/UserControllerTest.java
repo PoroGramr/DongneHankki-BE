@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Nested;
 import org.netway.dongnehankki.user.application.CoolSmsService;
 import org.netway.dongnehankki.user.application.UserService;
 import org.netway.dongnehankki.user.domain.User;
