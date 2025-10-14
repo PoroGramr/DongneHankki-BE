@@ -31,4 +31,6 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 	List<Store> findTop5ByNameContaining(String name);
 
 	List<Store> findByNameAndAddress(String name, String address);
+
+    Optional<Store> findByName(String storeName);
 }
