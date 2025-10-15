@@ -5,6 +5,7 @@ import org.netway.dongnehankki.global.auth.CustomUserDetails;
 import org.netway.dongnehankki.global.auth.jwt.JwtTokenProvider;
 import org.netway.dongnehankki.user.domain.User;
 import org.netway.dongnehankki.user.infrastructure.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,9 +29,11 @@ public class TestDataController {
     @GetMapping("/token")
     public ResponseEntity<String> getLikerUserToken() {
         String username = "liker_user";
-        User user = userRepository.findByLoginId(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
+        User user = userRepository.findByLoginId(username).orElse(null);
+        if (user == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + username);
+        }
         CustomUserDetails userDetails = new CustomUserDetails(user);
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 
