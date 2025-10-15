@@ -72,6 +72,7 @@ public class TestDataService {
             Store randomStore = stores.get(random.nextInt(stores.size()));
             String content = adjectives[random.nextInt(adjectives.length)] + " " + nouns[random.nextInt(nouns.length)] + " #" + (postRepository.count() + i);
             Post post = Post.createPost(content, randomStore, randomUser, Post.Role.CUSTOMER);
+            post.addImage("https://postfiles.pstatic.net/MjAyNTEwMTJfMTY5/MDAxNzYwMjUzNTAyMTI1.OhFHru_gdTBu-lDk2ZZW-A95T_tg3QSJhbrszIRvqsgg.6rEgtwtdv9bvF0lmfMCsiyV60paopVl20lG7GWnCYMsg.JPEG/IMG%EF%BC%BF6787.JPG?type=w3840", 0);
 
             Collections.shuffle(hashtags);
             int numHashtags = 2 + random.nextInt(2);
