@@ -24,7 +24,7 @@ public class PostResponse {
     private final Role uploderRole;
     private final List<ImageResponse> images;
     private final List<String> hashtags;
-    private final int likeCount;
+    private final long likeCount;
     private final boolean isLiked;
     private final int commentCount;
 
@@ -33,7 +33,7 @@ public class PostResponse {
 
     @Builder
     public PostResponse(Long postId, String content, Long storeId, String storeName, Long userId, String userNickname,
-        Role uploderRole, List<ImageResponse> images, List<String> hashtags, int likeCount, LocalDateTime createdAt, boolean isLiked, int commentCount) {
+        Role uploderRole, List<ImageResponse> images, List<String> hashtags, long likeCount, LocalDateTime createdAt, boolean isLiked, int commentCount) {
         this.postId = postId;
         this.content = content;
         this.storeId = storeId;
@@ -65,7 +65,7 @@ public class PostResponse {
                 .hashtags(post.getPostHashtags().stream()
                         .map(postHashtag -> postHashtag.getHashtag().getName())
                         .collect(Collectors.toList()))
-                .likeCount(post.getPostLikes().size())
+                .likeCount(post.getLikeCount())
                 .createdAt(post.getCreatedAt())
                 .build();
     }
@@ -86,7 +86,7 @@ public class PostResponse {
             .hashtags(post.getPostHashtags().stream()
                 .map(postHashtag -> postHashtag.getHashtag().getName())
                 .collect(Collectors.toList()))
-            .likeCount(post.getPostLikes().size())
+            .likeCount(post.getLikeCount())
             .createdAt(post.getCreatedAt())
             .isLiked(isLiked)
             .commentCount(commentCount)
