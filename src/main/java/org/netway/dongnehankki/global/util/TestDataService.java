@@ -67,10 +67,11 @@ public class TestDataService {
         String[] adjectives = {"맛있는", "최고의", "환상적인", "가성비 좋은", "분위기 있는", "특별한"};
         String[] nouns = {"맛집", "한끼", "식사", "경험", "장소", "추억"};
         List<Post> posts = new ArrayList<>();
+        long baseCount = postRepository.count();
         for (int i = 0; i < count; i++) {
             User randomUser = randomUsers.get(random.nextInt(randomUsers.size()));
             Store randomStore = stores.get(random.nextInt(stores.size()));
-            String content = adjectives[random.nextInt(adjectives.length)] + " " + nouns[random.nextInt(nouns.length)] + " #" + (postRepository.count() + i);
+            String content = adjectives[random.nextInt(adjectives.length)] + " " + nouns[random.nextInt(nouns.length)] + " #" + (baseCount + i);
             Post post = Post.createPost(content, randomStore, randomUser, Post.Role.CUSTOMER);
             post.addImage("https://postfiles.pstatic.net/MjAyNTEwMTJfMTY5/MDAxNzYwMjUzNTAyMTI1.OhFHru_gdTBu-lDk2ZZW-A95T_tg3QSJhbrszIRvqsgg.6rEgtwtdv9bvF0lmfMCsiyV60paopVl20lG7GWnCYMsg.JPEG/IMG%EF%BC%BF6787.JPG?type=w3840", 0);
 
