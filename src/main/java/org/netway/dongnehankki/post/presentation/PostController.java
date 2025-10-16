@@ -168,11 +168,7 @@ public class PostController {
 
         Long userId = userDetails.getUser().getUserId();
 
-        List<Post> recommendedPosts = postService.getRecommendedPosts(userId, limit);
-
-        List<PostResponse> response = recommendedPosts.stream()
-            .map(post -> PostResponse.fromEntity(post))
-            .collect(Collectors.toList());
+        List<PostResponse> response = postService.getRecommendedPosts(userId, limit);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

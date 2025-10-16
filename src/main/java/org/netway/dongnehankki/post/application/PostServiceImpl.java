@@ -284,16 +284,25 @@ public class PostServiceImpl implements PostService {
         return vertexAIService.generatePost(image, prompt);
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public List<Post> getRecommendedPosts(Long userId, int limit) {
-        Pageable pageable = PageRequest.of(0, limit);
+    public List<PostResponse> getRecommendedPosts(Long userId, int limit) {
+        final int poolSize = limit * 5; // 추천 후보군을 5배수만큼 조회
+        Pageable pageable = PageRequest.of(0, poolSize);
 
+        // 1. 사용자가 '좋아요'한 게시물 ID 목록 전체를 미리 조회
         List<PostLike> likedPosts = postLikeRepository.findByUser_UserId(userId);
-        List<Post> personalizedRecommendations;
+        List<Long> likedPostIds = likedPosts.stream()
+            .map(postLike -> postLike.getPost().getPostId())
+            .toList();
 
+        // 2. 추천 후보 게시글 ID 목록 조회 (페이징 최적화)
+        List<Long> personalizedRecommendationIds;
         if (likedPosts.isEmpty()) {
-            personalizedRecommendations = postRepository.findTopByOrderByCreatedAtDesc(pageable);
+            // 2-1. 콜드 스타트: 최신 게시글 ID를 가져옴
+            personalizedRecommendationIds = postRepository.findTopPostIdsByOrderByCreatedAtDesc(pageable);
         } else {
+            // 2-2. 관심 해시태그 기반: 가장 많이 좋아요 한 해시태그 기반으로 게시글 ID 조회
             Map<String, Long> hashtagFrequencies = likedPosts.stream()
                 .flatMap(postLike -> postLike.getPost().getPostHashtags().stream())
                 .map(postHashtag -> postHashtag.getHashtag().getName())
@@ -305,22 +314,48 @@ public class PostServiceImpl implements PostService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-            List<Long> likedPostIds = likedPosts.stream()
-                .map(postLike -> postLike.getPost().getPostId())
-                .collect(Collectors.toList());
-
-            personalizedRecommendations = postRepository.findRecommendedPostsByHashtags(topHashtags, likedPostIds, pageable);
+            if (topHashtags.isEmpty()) {
+                personalizedRecommendationIds = postRepository.findTopPostIdsByOrderByCreatedAtDesc(pageable);
+            } else {
+                personalizedRecommendationIds = postRepository.findRecommendedPostIdsByHashtags(topHashtags, likedPostIds, pageable);
+            }
         }
 
+        // 3. 인기 게시글 ID 조회
         List<Long> popularPostIds = postRepository.findTopNPopularPostIds(pageable);
-        List<Post> popularRecommendations = postRepository.findAllById(popularPostIds);
 
-        Set<Post> combinedRecommendations = new HashSet<>();
-        combinedRecommendations.addAll(personalizedRecommendations);
-        combinedRecommendations.addAll(popularRecommendations);
+        // 4. 추천 ID 목록들을 합치고, 이미 좋아요 한 게시물은 제외 후 셔플
+        Set<Long> finalPostIdsSet = new java.util.LinkedHashSet<>(personalizedRecommendationIds);
+        finalPostIdsSet.addAll(popularPostIds);
+        finalPostIdsSet.removeAll(likedPostIds);
 
-        return combinedRecommendations.stream()
+        List<Long> shuffledIds = new java.util.ArrayList<>(finalPostIdsSet);
+        java.util.Collections.shuffle(shuffledIds);
+        List<Long> finalPostIds = shuffledIds.stream()
             .limit(limit)
+            .collect(Collectors.toList());
+
+        if (finalPostIds.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+
+        // 5. 최종 ID 목록으로 게시글 상세 정보를 한번에 조회
+        List<Post> finalPosts = postRepository.findAllById(finalPostIds);
+
+        // 6. DTO 변환에 필요한 추가 정보(좋아요, 댓글 수)를 일괄 조회
+        Set<Long> userLikedPostIdsInFinalList = postLikeRepository.findByUser_UserIdAndPost_PostIdIn(userId, finalPostIds)
+            .stream().map(postLike -> postLike.getPost().getPostId()).collect(Collectors.toSet());
+        Map<Long, Integer> commentCounts = commentRepository.countByPostIdIn(finalPostIds).stream()
+            .collect(Collectors.toMap(result -> (Long) result[0], result -> ((Number) result[1]).intValue()));
+
+        // 7. ID 목록의 순서를 보장하며 DTO로 변환
+        Map<Long, Post> postMap = finalPosts.stream()
+            .collect(Collectors.toMap(Post::getPostId, post -> post));
+
+        return finalPostIds.stream()
+            .map(postMap::get)
+            .filter(java.util.Objects::nonNull)
+            .map(post -> PostResponse.fromEntity(post, userLikedPostIdsInFinalList.contains(post.getPostId()), commentCounts.getOrDefault(post.getPostId(), 0)))
             .collect(Collectors.toList());
     }
 }

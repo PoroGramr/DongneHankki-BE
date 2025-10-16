@@ -19,5 +19,5 @@ public interface PostService {
     CursorResult<PostResponse> getPostsFromFollowedStores(Long userId, Long cursorPostId, int pageSize);
     CursorResult<PostResponse> latestPosts(Long cursorPostId, int pageSize);
     String generatePost(Long storeId, String text, MultipartFile image);
-    List<Post> getRecommendedPosts(Long userId, int limit);
+    List<PostResponse> getRecommendedPosts(Long userId, int limit);
 }
