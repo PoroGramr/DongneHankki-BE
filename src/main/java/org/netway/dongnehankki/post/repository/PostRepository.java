@@ -40,23 +40,17 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         "postHashtags.hashtag", "postLikes"})
     List<Post> findAllByPostIdLessThanOrderByPostIdDesc(Long cursorPostId, Pageable pageable);
 
-    // --- 추천 API 최적화를 위한 메소드 ---
-
-    // 콜드 스타트용: 최신 게시글 ID 조회
     @Query("SELECT p.postId FROM Post p ORDER BY p.createdAt DESC")
     List<Long> findTopPostIdsByOrderByCreatedAtDesc(Pageable pageable);
 
-    // 해시태그 기반 추천: 관심 해시태그를 포함하는 게시글 ID 조회
     @Query("SELECT p.postId FROM Post p JOIN p.postHashtags ph WHERE ph.hashtag.name IN :hashtags AND p.postId NOT IN :excludePostIds GROUP BY p.postId ORDER BY MAX(p.createdAt) DESC")
     List<Long> findRecommendedPostIdsByHashtags(@Param("hashtags") List<String> hashtags,
         @Param("excludePostIds") List<Long> excludePostIds,
         Pageable pageable);
 
-    // 인기 게시글 ID 조회: 좋아요 수 기준으로 정렬
     @Query("SELECT p.postId FROM Post p LEFT JOIN p.postLikes pl GROUP BY p.postId ORDER BY COUNT(pl.id) DESC")
     List<Long> findTopNPopularPostIds(Pageable pageable);
 
-    // findAllById 오버라이드: 추천 로직의 2단계 조회를 위해 EntityGraph 적용
     @Override
     @EntityGraph(attributePaths = {"user", "store", "store.user", "images", "postHashtags", "postHashtags.hashtag", "postLikes"})
     List<Post> findAllById(Iterable<Long> ids);
