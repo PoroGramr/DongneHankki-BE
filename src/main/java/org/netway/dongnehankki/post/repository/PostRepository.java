@@ -35,18 +35,18 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByStoreInOrderByPostIdDesc(List<Store> stores, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"user", "store", "images", "postHashtags",
+    @EntityGraph(attributePaths = {"user", "store", "store.user", "images", "postHashtags",
         "postHashtags.hashtag", "postLikes"})
     List<Post> findAllByOrderByPostIdDesc(Pageable pageable);
 
-    @EntityGraph(attributePaths = {"user", "store", "images", "postHashtags",
+    @EntityGraph(attributePaths = {"user", "store", "store.user", "images", "postHashtags",
         "postHashtags.hashtag", "postLikes"})
     List<Post> findAllByPostIdLessThanOrderByPostIdDesc(Long cursorPostId, Pageable pageable);
 
     // --- 새로 추가되는 메소드 ---
 
     // 콜드 스타트용: 최신 게시글 N개 조회
-    @EntityGraph(attributePaths = {"user", "store", "images", "postHashtags",
+    @EntityGraph(attributePaths = {"user", "store", "store.user", "images", "postHashtags",
         "postHashtags.hashtag", "postLikes"})
     List<Post> findTopByOrderByCreatedAtDesc(Pageable pageable);
 
@@ -54,7 +54,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT p FROM Post p JOIN p.postHashtags ph JOIN ph.hashtag h " +
         "WHERE h.name IN :hashtags AND p.postId NOT IN :excludePostIds " +
         "ORDER BY p.createdAt DESC")
-    @EntityGraph(attributePaths = {"user", "store", "images", "postHashtags",
+    @EntityGraph(attributePaths = {"user", "store", "store.user", "images", "postHashtags",
         "postHashtags.hashtag", "postLikes"})
     List<Post> findRecommendedPostsByHashtags(@Param("hashtags") List<String> hashtags,
         @Param("excludePostIds") List<Long> excludePostIds,

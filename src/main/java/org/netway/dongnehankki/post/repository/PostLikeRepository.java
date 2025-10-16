@@ -6,9 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
+
 public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
     Optional<PostLike> findByUser_UserIdAndPost_PostId(Long userId, Long postId);
     boolean existsByUser_UserIdAndPost_PostId(Long userId, Long postId);
+
+    @EntityGraph(attributePaths = {"post", "post.postHashtags", "post.postHashtags.hashtag"})
     List<PostLike> findByUser_UserId(Long userId);
 
 }
