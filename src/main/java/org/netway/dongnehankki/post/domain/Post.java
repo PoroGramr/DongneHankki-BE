@@ -59,6 +59,8 @@ public class Post extends BaseEntity {
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<PostLike> postLikes = new HashSet<>();
 
+    private long likeCount;
+
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
@@ -93,4 +95,12 @@ public class Post extends BaseEntity {
 		this.postHashtags.clear();
 		newHashtags.forEach(this::addPostHashtag);
 	}
+
+    public void likeIncrement() {
+        this.likeCount += 1;
+    }
+
+    public void likeDecrement() {
+        this.likeCount -= 1;
+    }
 }
