@@ -36,12 +36,22 @@ public class PostLikeServiceImpl implements PostLikeService {
 
         PostLike postLike = PostLike.of(user, post);
         postLikeRepository.save(postLike);
+
+        post.likeIncrement();
+        postRepository.save(post);
     }
 
     @Transactional
     public void unlikePost(Long userId, Long postId) {
         PostLike postLike = postLikeRepository.findByUser_UserIdAndPost_PostId(userId, postId)
                 .orElseThrow(() -> new NotLikedException());
+
+        Post post = postLike.getPost();
+
         postLikeRepository.delete(postLike);
+
+        post.likeDecrement();
+        postRepository.save(post);
+
     }
 }
