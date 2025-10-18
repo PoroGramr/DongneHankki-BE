@@ -52,7 +52,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Long> findTopNPopularPostIds(Pageable pageable);
 
     @Override
-    @EntityGraph(attributePaths = {"user", "store", "store.user", "images", "postHashtags", "postHashtags.hashtag", "postLikes"})
+    @EntityGraph(attributePaths = {"user", "store", "store.user", "images", "postHashtags", "postHashtags.hashtag"})
     List<Post> findAllById(Iterable<Long> ids);
 
     List<Post> findTop5ByStoreAndRoleOrderByCreatedAtDesc(Store store, Post.Role role);
