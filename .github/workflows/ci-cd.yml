@@ -2,7 +2,7 @@ name: CI/CD with Docker Registry
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "develop" , "temp/before251019"]
   pull_request:
     branches: [ "develop" , "temp/before251019"]
 
