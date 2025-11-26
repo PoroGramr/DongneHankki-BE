@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 app.log
 .DS_Store
+**/.DS_Store
 
 ### STS ###
 .apt_generated
