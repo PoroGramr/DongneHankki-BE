@@ -48,7 +48,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         @Param("excludePostIds") List<Long> excludePostIds,
         Pageable pageable);
 
-    @Query("SELECT p.postId FROM Post p LEFT JOIN p.postLikes pl GROUP BY p.postId ORDER BY COUNT(pl.id) DESC")
+    @Query("SELECT p.postId FROM Post p ORDER BY p.likeCount DESC, p.createdAt DESC")
     List<Long> findTopNPopularPostIds(Pageable pageable);
 
     @Override
