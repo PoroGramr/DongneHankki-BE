@@ -12,4 +12,4 @@ COPY src/main/resources/googlecloudkey.json BOOT-INF/classes/
 
 EXPOSE 8083
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xms1G", "-Xmx1G", "-jar", "app.jar"]
