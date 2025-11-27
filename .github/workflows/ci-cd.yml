@@ -97,6 +97,7 @@ jobs:
             
             # 3. 새 이미지로 컨테이너 실행
             docker run -d \
+            -m 2g \
             --name dongnehankki \
             --network attendance-deploy_attendance-net \
             --label traefik.enable=true \
