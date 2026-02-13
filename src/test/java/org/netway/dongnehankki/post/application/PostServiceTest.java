@@ -60,8 +60,6 @@ class PostServiceTest {
     private S3Service s3Service;
     @Mock
     private PostLikeRepository postLikeRepository;
-    @Mock
-    private CommentRepository commentRepository;
 
     @Test
     @DisplayName("게시글 생성 테스트")
